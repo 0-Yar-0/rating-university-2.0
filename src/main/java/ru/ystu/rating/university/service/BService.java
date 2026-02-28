@@ -76,6 +76,8 @@ public class BService {
             dataRepo.deleteByAppUserAndClassTypeAndIterAndYearData(
                     user, bClass, iter, p.year());
 
+            Data d = new Data();
+            d.setAppUser(user);
             d.setClassType(bClass);
             d.setIter(iter);
             d.setYearData(p.year());
@@ -93,6 +95,11 @@ public class BService {
             // relevant from BParamsDto.
             Map<String, Double> paramMap = new HashMap<>();
             paramMap.put("ENa", p.ENa());
+
+            // utility method for optional entries
+            java.util.function.BiConsumer<String, Double> putIfNotNull = (k,v) -> {
+                if (v != null) paramMap.put(k, v);
+            };
             paramMap.put("ENb", p.ENb());
             paramMap.put("ENc", p.ENc());
             paramMap.put("Eb", p.Eb());
@@ -123,6 +130,31 @@ public class BService {
             paramMap.put("VO", p.VO());
             paramMap.put("PO", p.PO());
             paramMap.put("B33_o", p.B33_o());
+            // additional indicators for B34..B44
+            putIfNotNull(paramMap, "NR2023", p.NR2023());
+            putIfNotNull(paramMap, "NR2024", p.NR2024());
+            putIfNotNull(paramMap, "NR2025", p.NR2025());
+            putIfNotNull(paramMap, "WL2022", p.WL2022());
+            putIfNotNull(paramMap, "WL2023", p.WL2023());
+            putIfNotNull(paramMap, "WL2024", p.WL2024());
+            putIfNotNull(paramMap, "NPR2022", p.NPR2022());
+            putIfNotNull(paramMap, "NPR2023", p.NPR2023());
+            putIfNotNull(paramMap, "NPR2024", p.NPR2024());
+            putIfNotNull(paramMap, "DN2022", p.DN2022());
+            putIfNotNull(paramMap, "DN2023", p.DN2023());
+            putIfNotNull(paramMap, "DN2024", p.DN2024());
+            putIfNotNull(paramMap, "Io", p.Io());
+            putIfNotNull(paramMap, "Iv", p.Iv());
+            putIfNotNull(paramMap, "Iz", p.Iz());
+            putIfNotNull(paramMap, "No", p.No());
+            putIfNotNull(paramMap, "Nv", p.Nv());
+            putIfNotNull(paramMap, "Nz", p.Nz());
+            putIfNotNull(paramMap, "OD2022", p.OD2022());
+            putIfNotNull(paramMap, "OD2023", p.OD2023());
+            putIfNotNull(paramMap, "OD2024", p.OD2024());
+            putIfNotNull(paramMap, "PN2022", p.PN2022());
+            putIfNotNull(paramMap, "PN2023", p.PN2023());
+            putIfNotNull(paramMap, "PN2024", p.PN2024());
 
             DocumentCalcDto docCalc = documentService.computeAll(new DocumentParamsDto(paramMap));
 
@@ -143,17 +175,37 @@ public class BService {
                     docCalc.get("B31"),
                     docCalc.get("B32"),
                     docCalc.get("B33"),
+                    docCalc.get("B34"),
+                    docCalc.get("B41"),
+                    docCalc.get("B42"),
+                    docCalc.get("B43"),
+                    docCalc.get("B44"),
                     calcDto.sumB() +
                             docCalc.get("B22") + docCalc.get("B23") + docCalc.get("B24")
                                     + docCalc.get("B25") + docCalc.get("B26")
-                                    + docCalc.get("B31") + docCalc.get("B32") + docCalc.get("B33"),
+                                    + docCalc.get("B31") + docCalc.get("B32") + docCalc.get("B33")
+                                    + docCalc.get("B34") + docCalc.get("B41") + docCalc.get("B42")
+                                    + docCalc.get("B43") + docCalc.get("B44"),
                     calcDto.codeClassA(),
                     calcDto.codeClassB(),
                     calcDto.codeClassV(),
                     calcDto.codeB11(),
                     calcDto.codeB12(),
                     calcDto.codeB13(),
-                    calcDto.codeB21()
+                    calcDto.codeB21(),
+                    calcDto.codeB22(),
+                    calcDto.codeB23(),
+                    calcDto.codeB24(),
+                    calcDto.codeB25(),
+                    calcDto.codeB26(),
+                    calcDto.codeB31(),
+                    calcDto.codeB32(),
+                    calcDto.codeB33(),
+                    calcDto.codeB34(),
+                    calcDto.codeB41(),
+                    calcDto.codeB42(),
+                    calcDto.codeB43(),
+                    calcDto.codeB44()
             );
 
             CalcResult cr = new CalcResult();
@@ -340,7 +392,11 @@ public class BService {
         names.setCodeB12(dto.codeB12());
         names.setCodeB13(dto.codeB13());
         names.setCodeB21(dto.codeB21());
-
-        namesRepo.save(names);
-    }
-}
+                names.setCodeB22(dto.codeB22());
+                names.setCodeB23(dto.codeB23());
+                names.setCodeB24(dto.codeB24());
+                names.setCodeB25(dto.codeB25());
+                names.setCodeB26(dto.codeB26());
+                names.setCodeB31(dto.codeB31());
+                names.setCodeB32(dto.codeB32());
+                names.setCodeB33(dto.codeB33());

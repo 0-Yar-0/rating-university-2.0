@@ -33,7 +33,32 @@ public record BParamsDto(
         Double Npr,
         Double VO,
         Double PO,
-        Double B33_o
+        Double B33_o,
+        // inputs for additional metrics
+        Double NR2023,
+        Double NR2024,
+        Double NR2025,
+        Double WL2022,
+        Double WL2023,
+        Double WL2024,
+        Double NPR2022,
+        Double NPR2023,
+        Double NPR2024,
+        Double DN2022,
+        Double DN2023,
+        Double DN2024,
+        Double Io,
+        Double Iv,
+        Double Iz,
+        Double No,
+        Double Nv,
+        Double Nz,
+        Double OD2022,
+        Double OD2023,
+        Double OD2024,
+        Double PN2022,
+        Double PN2023,
+        Double PN2024
 ) {
 }
 

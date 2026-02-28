@@ -172,6 +172,78 @@ public class DocumentService {
             out.put("B33", b33);
         }
 
+        // --------------------------------------------------
+        // B34 — востребованность на рынке труда
+        // raw index values may be missing; treat null as 0
+        double nr2023 = v.apply("NR2023");
+        double nr2024 = v.apply("NR2024");
+        double nr2025 = v.apply("NR2025");
+        int k = 0;
+        k += nr2023 > 0 ? 1 : 0;
+        k += nr2024 > 0 ? 1 : 0;
+        k += nr2025 > 0 ? 1 : 0;
+        if (k == 0) k = 1;
+        double b34raw = (nr2023 + nr2024 + nr2025) * 100.0 / k;
+        out.put("B34_raw", b34raw);
+        out.put("B34", Normalizer.clamp01(b34raw, 0.0, 1.0)); // weight not specified, keep raw
+
+        // B41 — публикации на 100 НПР
+        double wl2022 = v.apply("WL2022");
+        double wl2023 = v.apply("WL2023");
+        double wl2024 = v.apply("WL2024");
+        double npr2022 = v.apply("NPR2022");
+        double npr2023 = v.apply("NPR2023");
+        double npr2024 = v.apply("NPR2024");
+        double sum41 = 0;
+        int cnt41 = 0;
+        if (npr2022 > 0) { sum41 += wl2022 / npr2022; cnt41++; }
+        if (npr2023 > 0) { sum41 += wl2023 / npr2023; cnt41++; }
+        if (npr2024 > 0) { sum41 += wl2024 / npr2024; cnt41++; }
+        double b41raw = cnt41 > 0 ? (sum41 / cnt41) * 100.0 : 0.0;
+        out.put("B41_raw", b41raw);
+        out.put("B41", b41raw);
+
+        // B42 — доходы от НИОКР на 1 НПР
+        double dn2022 = v.apply("DN2022");
+        double dn2023 = v.apply("DN2023");
+        double dn2024 = v.apply("DN2024");
+        double sum42 = 0;
+        int cnt42 = 0;
+        if (npr2022 > 0) { sum42 += dn2022 / npr2022; cnt42++; }
+        if (npr2023 > 0) { sum42 += dn2023 / npr2023; cnt42++; }
+        if (npr2024 > 0) { sum42 += dn2024 / npr2024; cnt42++; }
+        double b42raw = cnt42 > 0 ? sum42 / cnt42 : 0.0;
+        out.put("B42_raw", b42raw);
+        out.put("B42", b42raw);
+
+        // B43 — доля иностранных обучающихся
+        double io = v.apply("Io");
+        double iv = v.apply("Iv");
+        double iz = v.apply("Iz");
+        double no = v.apply("No");
+        double nv = v.apply("Nv");
+        double nz = v.apply("Nz");
+        double denom43 = no + 0.25 * nv + 0.1 * nz;
+        double b43raw = denom43 == 0 ? 0.0 : (io + 0.25 * iv + 0.1 * iz) / denom43 * 100.0;
+        out.put("B43_raw", b43raw);
+        out.put("B43", b43raw);
+
+        // B44 — доходы на 1 обучающегося
+        double od2022 = v.apply("OD2022");
+        double od2023 = v.apply("OD2023");
+        double od2024 = v.apply("OD2024");
+        double pn2022 = v.apply("PN2022");
+        double pn2023 = v.apply("PN2023");
+        double pn2024 = v.apply("PN2024");
+        double sum44 = 0;
+        int cnt44 = 0;
+        if (pn2022>0) { sum44 += od2022 / pn2022; cnt44++; }
+        if (pn2023>0) { sum44 += od2023 / pn2023; cnt44++; }
+        if (pn2024>0) { sum44 += od2024 / pn2024; cnt44++; }
+        double b44raw = cnt44>0 ? sum44 / cnt44 : 0.0;
+        out.put("B44_raw", b44raw);
+        out.put("B44", b44raw);
+
         return new DocumentCalcDto(out);
     }
 }

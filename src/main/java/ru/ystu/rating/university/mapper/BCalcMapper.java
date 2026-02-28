@@ -39,6 +39,11 @@ public final class BCalcMapper {
         m.put("B31", dto.b31());
         m.put("B32", dto.b32());
         m.put("B33", dto.b33());
+        m.put("B34", dto.b34());
+        m.put("B41", dto.b41());
+        m.put("B42", dto.b42());
+        m.put("B43", dto.b43());
+        m.put("B44", dto.b44());
         m.put("total", dto.sumB());
         return m;
     }
@@ -81,6 +86,11 @@ public final class BCalcMapper {
                 getDouble(json, "B31"),
                 getDouble(json, "B32"),
                 getDouble(json, "B33"),
+                getDouble(json, "B34"),
+                getDouble(json, "B41"),
+                getDouble(json, "B42"),
+                getDouble(json, "B43"),
+                getDouble(json, "B44"),
                 getDouble(json, "total"),
                 codeClassA,
                 codeClassB,
@@ -88,7 +98,20 @@ public final class BCalcMapper {
                 codeB11,
                 codeB12,
                 codeB13,
-                codeB21
+                codeB21,
+                codeB22,
+                codeB23,
+                codeB24,
+                codeB25,
+                codeB26,
+                codeB31,
+                codeB32,
+                codeB33,
+                codeB34,
+                codeB41,
+                codeB42,
+                codeB43,
+                codeB44
         );
     }
 

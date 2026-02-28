@@ -34,6 +34,30 @@ public class CalcResultName {
     @Column(name = "code_b21", nullable = false, length = 50)
     private String codeB21 = "B21";
 
+    @Column(name = "code_b22", nullable = false, length = 50)
+    private String codeB22 = "B22";
+
+    @Column(name = "code_b23", nullable = false, length = 50)
+    private String codeB23 = "B23";
+
+    @Column(name = "code_b24", nullable = false, length = 50)
+    private String codeB24 = "B24";
+
+    @Column(name = "code_b25", nullable = false, length = 50)
+    private String codeB25 = "B25";
+
+    @Column(name = "code_b26", nullable = false, length = 50)
+    private String codeB26 = "B26";
+
+    @Column(name = "code_b31", nullable = false, length = 50)
+    private String codeB31 = "B31";
+
+    @Column(name = "code_b32", nullable = false, length = 50)
+    private String codeB32 = "B32";
+
+    @Column(name = "code_b33", nullable = false, length = 50)
+    private String codeB33 = "B33";
+
     public CalcResultName() {
     }
 
