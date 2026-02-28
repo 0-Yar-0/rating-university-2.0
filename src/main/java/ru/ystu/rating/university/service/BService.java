@@ -400,3 +400,7 @@ public class BService {
                 names.setCodeB31(dto.codeB31());
                 names.setCodeB32(dto.codeB32());
                 names.setCodeB33(dto.codeB33());
+        namesRepo.save(names);
+    }
+
+}
