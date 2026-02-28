@@ -30,6 +30,26 @@ public final class BParamsMapper {
         m.put("beta132", dto.beta132());
         m.put("beta211", dto.beta211());
         m.put("beta212", dto.beta212());
+        // extended inputs might be null, put only non-null entries
+        putIfNotNull(m, "NBP", dto.NBP());
+        putIfNotNull(m, "NMP", dto.NMP());
+        putIfNotNull(m, "ACP", dto.ACP());
+        putIfNotNull(m, "OPC", dto.OPC());
+        putIfNotNull(m, "ACC", dto.ACC());
+        putIfNotNull(m, "PKP", dto.PKP());
+        putIfNotNull(m, "PPP", dto.PPP());
+        putIfNotNull(m, "NP", dto.NP());
+        putIfNotNull(m, "NOA", dto.NOA());
+        putIfNotNull(m, "NAP", dto.NAP());
+        putIfNotNull(m, "B25_o", dto.B25_o());
+        putIfNotNull(m, "B26_o", dto.B26_o());
+        putIfNotNull(m, "UT", dto.UT());
+        putIfNotNull(m, "DO", dto.DO());
+        putIfNotNull(m, "N", dto.N());
+        putIfNotNull(m, "Npr", dto.Npr());
+        putIfNotNull(m, "VO", dto.VO());
+        putIfNotNull(m, "PO", dto.PO());
+        putIfNotNull(m, "B33_o", dto.B33_o());
         return m;
     }
 
@@ -50,7 +70,26 @@ public final class BParamsMapper {
                 getDouble(json, "beta131"),
                 getDouble(json, "beta132"),
                 getDouble(json, "beta211"),
-                getDouble(json, "beta212")
+                getDouble(json, "beta212"),
+                getDouble(json, "NBP"),
+                getDouble(json, "NMP"),
+                getDouble(json, "ACP"),
+                getDouble(json, "OPC"),
+                getDouble(json, "ACC"),
+                getDouble(json, "PKP"),
+                getDouble(json, "PPP"),
+                getDouble(json, "NP"),
+                getDouble(json, "NOA"),
+                getDouble(json, "NAP"),
+                getDouble(json, "B25_o"),
+                getDouble(json, "B26_o"),
+                getDouble(json, "UT"),
+                getDouble(json, "DO"),
+                getDouble(json, "N"),
+                getDouble(json, "Npr"),
+                getDouble(json, "VO"),
+                getDouble(json, "PO"),
+                getDouble(json, "B33_o")
         );
     }
 
@@ -63,6 +102,12 @@ public final class BParamsMapper {
             return n.doubleValue();
         }
         return Double.parseDouble(v.toString());
+    }
+
+    private static void putIfNotNull(Map<String, Object> m, String key, Double value) {
+        if (value != null) {
+            m.put(key, value);
+        }
     }
 }
 

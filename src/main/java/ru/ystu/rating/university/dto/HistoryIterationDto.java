@@ -4,6 +4,6 @@ import java.util.List;
 
 public record HistoryIterationDto(
         Integer iter,
-        List<BCalcDto> results
+        List<?> results
 ) {
 }

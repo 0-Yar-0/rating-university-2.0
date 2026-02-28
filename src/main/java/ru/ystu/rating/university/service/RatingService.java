@@ -19,16 +19,19 @@ public class RatingService {
     private final DataRepository dataRepo;
     private final UserIterStateRepository userIterStateRepo;
     private final BService bService;
-    // добавить AService и VService
+    private final AService aService;
+    // в будущем: VService
 
     public RatingService(AppUserRepository userRepo,
                          DataRepository dataRepo,
                          UserIterStateRepository userIterStateRepo,
-                         BService bService) {
+                         BService bService,
+                         AService aService) {
         this.userRepo = userRepo;
         this.dataRepo = dataRepo;
         this.userIterStateRepo = userIterStateRepo;
         this.bService = bService;
+        this.aService = aService;
     }
 
     // ========================================================================
@@ -75,8 +78,15 @@ public class RatingService {
                         resultBlocks.add(new ClassCalcBlockDto("B", bResults));
                     }
                     case "A" -> {
-                        // Заглушка AService
-                        resultBlocks.add(new ClassCalcBlockDto("A", List.of()));
+                        @SuppressWarnings("unchecked")
+                        List<AParamsDto> aParams = (List<AParamsDto>) (List<?>) block.data();
+                        List<ACalcDto> aResults = aService.saveParamsAndComputeForA(
+                                user,
+                                nextIter,
+                                aParams,
+                                null
+                        );
+                        resultBlocks.add(new ClassCalcBlockDto("A", aResults));
                     }
                     case "V" -> {
                         // Заглушка VService

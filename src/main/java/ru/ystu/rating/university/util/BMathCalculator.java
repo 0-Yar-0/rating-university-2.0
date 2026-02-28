@@ -54,6 +54,8 @@ public class BMathCalculator {
 
         double totalB = b11 + b12 + b13 + b21;
 
+        // at this point only the first four metrics have been calculated;
+        // the rest will be filled later by DocumentService if needed.
         return new BCalcDto(
                 null,
                 p.year(),
@@ -62,6 +64,14 @@ public class BMathCalculator {
                 b12,
                 b13,
                 b21,
+                0.0, // b22
+                0.0, // b23
+                0.0, // b24
+                0.0, // b25
+                0.0, // b26
+                0.0, // b31
+                0.0, // b32
+                0.0, // b33
                 totalB,
                 "А",
                 "Б",

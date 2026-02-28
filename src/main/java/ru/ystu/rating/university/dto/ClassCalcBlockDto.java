@@ -4,6 +4,6 @@ import java.util.List;
 
 public record ClassCalcBlockDto(
         String classType,
-        List<BCalcDto> data
+        List<?> data
 ) {
 }

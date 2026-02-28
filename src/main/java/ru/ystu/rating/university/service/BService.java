@@ -1,6 +1,5 @@
 package ru.ystu.rating.university.service;
 
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ystu.rating.university.dto.*;
@@ -24,6 +23,7 @@ public class BService {
     private final CalcResultRepository calcRepo;
     private final CalcResultNameRepository namesRepo;
     private final BMathCalculator bMathCalculator;
+    private final DocumentService documentService;
 
     public BService(AppUserRepository userRepo,
                     RatingClassRepository classRepo,
@@ -32,7 +32,8 @@ public class BService {
                     ParamsSetRepository paramsRepo,
                     CalcResultRepository calcRepo,
                     CalcResultNameRepository namesRepo,
-                    BMathCalculator bMathCalculator) {
+                    BMathCalculator bMathCalculator,
+                    DocumentService documentService) {
         this.userRepo = userRepo;
         this.classRepo = classRepo;
         this.dataRepo = dataRepo;
@@ -41,6 +42,7 @@ public class BService {
         this.calcRepo = calcRepo;
         this.namesRepo = namesRepo;
         this.bMathCalculator = bMathCalculator;
+        this.documentService = documentService;
     }
 
     // ========================================================================
@@ -82,6 +84,74 @@ public class BService {
             paramsRepo.save(ps);
 
             BCalcDto calcDto = bMathCalculator.computeBForYear(p, iter);
+
+            // build a generic map of parameters so we can ask DocumentService to
+            // produce the extended metrics; we copy everything that may be
+            // relevant from BParamsDto.
+            Map<String, Double> paramMap = new HashMap<>();
+            paramMap.put("ENa", p.ENa());
+            paramMap.put("ENb", p.ENb());
+            paramMap.put("ENc", p.ENc());
+            paramMap.put("Eb", p.Eb());
+            paramMap.put("Ec", p.Ec());
+            paramMap.put("beta121", p.beta121());
+            paramMap.put("beta122", p.beta122());
+            paramMap.put("beta131", p.beta131());
+            paramMap.put("beta132", p.beta132());
+            paramMap.put("beta211", p.beta211());
+            paramMap.put("beta212", p.beta212());
+            // extra fields
+            paramMap.put("NBP", p.NBP());
+            paramMap.put("NMP", p.NMP());
+            paramMap.put("ACP", p.ACP());
+            paramMap.put("OPC", p.OPC());
+            paramMap.put("ACC", p.ACC());
+            paramMap.put("PKP", p.PKP());
+            paramMap.put("PPP", p.PPP());
+            paramMap.put("NP", p.NP());
+            paramMap.put("NOA", p.NOA());
+            paramMap.put("NAP", p.NAP());
+            paramMap.put("B25_o", p.B25_o());
+            paramMap.put("B26_o", p.B26_o());
+            paramMap.put("UT", p.UT());
+            paramMap.put("DO", p.DO());
+            paramMap.put("N", p.N());
+            paramMap.put("Npr", p.Npr());
+            paramMap.put("VO", p.VO());
+            paramMap.put("PO", p.PO());
+            paramMap.put("B33_o", p.B33_o());
+
+            DocumentCalcDto docCalc = documentService.computeAll(new DocumentParamsDto(paramMap));
+
+            // transfer additional metrics into calcDto by rebuilding it - easier
+            calcDto = new BCalcDto(
+                    calcDto.calcResultId(),
+                    calcDto.year(),
+                    calcDto.iteration(),
+                    calcDto.b11(),
+                    calcDto.b12(),
+                    calcDto.b13(),
+                    calcDto.b21(),
+                    docCalc.get("B22"),
+                    docCalc.get("B23"),
+                    docCalc.get("B24"),
+                    docCalc.get("B25"),
+                    docCalc.get("B26"),
+                    docCalc.get("B31"),
+                    docCalc.get("B32"),
+                    docCalc.get("B33"),
+                    calcDto.sumB() +
+                            docCalc.get("B22") + docCalc.get("B23") + docCalc.get("B24")
+                                    + docCalc.get("B25") + docCalc.get("B26")
+                                    + docCalc.get("B31") + docCalc.get("B32") + docCalc.get("B33"),
+                    calcDto.codeClassA(),
+                    calcDto.codeClassB(),
+                    calcDto.codeClassV(),
+                    calcDto.codeB11(),
+                    calcDto.codeB12(),
+                    calcDto.codeB13(),
+                    calcDto.codeB21()
+            );
 
             CalcResult cr = new CalcResult();
             cr.setData(d);
