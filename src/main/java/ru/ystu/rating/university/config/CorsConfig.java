@@ -17,7 +17,7 @@ public class CorsConfig {
 
         // домен фронта
         cfg.setAllowedOrigins(List.of(
-                "https://rating-university-web-v2.onrender.com",
+                "https://rating-university-web-v2-1.onrender.com",
                 "https://rating-university-web.onrender.com",
                 "http://localhost:5173"
         ));
