@@ -58,6 +58,21 @@ public class CalcResultName {
     @Column(name = "code_b33", nullable = false, length = 50)
     private String codeB33 = "B33";
 
+    @Column(name = "code_b34", nullable = false, length = 50)
+    private String codeB34 = "B34";
+
+    @Column(name = "code_b41", nullable = false, length = 50)
+    private String codeB41 = "B41";
+
+    @Column(name = "code_b42", nullable = false, length = 50)
+    private String codeB42 = "B42";
+
+    @Column(name = "code_b43", nullable = false, length = 50)
+    private String codeB43 = "B43";
+
+    @Column(name = "code_b44", nullable = false, length = 50)
+    private String codeB44 = "B44";
+
     public CalcResultName() {
     }
 
@@ -131,5 +146,109 @@ public class CalcResultName {
 
     public void setCodeB21(String codeB21) {
         this.codeB21 = codeB21;
+    }
+
+    public String getCodeB22() {
+        return codeB22;
+    }
+
+    public void setCodeB22(String codeB22) {
+        this.codeB22 = codeB22;
+    }
+
+    public String getCodeB23() {
+        return codeB23;
+    }
+
+    public void setCodeB23(String codeB23) {
+        this.codeB23 = codeB23;
+    }
+
+    public String getCodeB24() {
+        return codeB24;
+    }
+
+    public void setCodeB24(String codeB24) {
+        this.codeB24 = codeB24;
+    }
+
+    public String getCodeB25() {
+        return codeB25;
+    }
+
+    public void setCodeB25(String codeB25) {
+        this.codeB25 = codeB25;
+    }
+
+    public String getCodeB26() {
+        return codeB26;
+    }
+
+    public void setCodeB26(String codeB26) {
+        this.codeB26 = codeB26;
+    }
+
+    public String getCodeB31() {
+        return codeB31;
+    }
+
+    public void setCodeB31(String codeB31) {
+        this.codeB31 = codeB31;
+    }
+
+    public String getCodeB32() {
+        return codeB32;
+    }
+
+    public void setCodeB32(String codeB32) {
+        this.codeB32 = codeB32;
+    }
+
+    public String getCodeB33() {
+        return codeB33;
+    }
+
+    public void setCodeB33(String codeB33) {
+        this.codeB33 = codeB33;
+    }
+
+    public String getCodeB34() {
+        return codeB34;
+    }
+
+    public void setCodeB34(String codeB34) {
+        this.codeB34 = codeB34;
+    }
+
+    public String getCodeB41() {
+        return codeB41;
+    }
+
+    public void setCodeB41(String codeB41) {
+        this.codeB41 = codeB41;
+    }
+
+    public String getCodeB42() {
+        return codeB42;
+    }
+
+    public void setCodeB42(String codeB42) {
+        this.codeB42 = codeB42;
+    }
+
+    public String getCodeB43() {
+        return codeB43;
+    }
+
+    public void setCodeB43(String codeB43) {
+        this.codeB43 = codeB43;
+    }
+
+    public String getCodeB44() {
+        return codeB44;
+    }
+
+    public void setCodeB44(String codeB44) {
+        this.codeB44 = codeB44;
     }
 }

@@ -16,6 +16,11 @@ public record MetricNamesDto(
         String codeB26,
         String codeB31,
         String codeB32,
-        String codeB33
+        String codeB33,
+        String codeB34,
+        String codeB41,
+        String codeB42,
+        String codeB43,
+        String codeB44
 ) {
 }

@@ -25,6 +25,13 @@ public class BService {
     private final BMathCalculator bMathCalculator;
     private final DocumentService documentService;
 
+    // helper used in several methods for building maps
+    private static void putIfNotNull(Map<String, Double> m, String key, Double val) {
+        if (val != null) {
+            m.put(key, val);
+        }
+    }
+
     public BService(AppUserRepository userRepo,
                     RatingClassRepository classRepo,
                     DataRepository dataRepo,
@@ -96,10 +103,6 @@ public class BService {
             Map<String, Double> paramMap = new HashMap<>();
             paramMap.put("ENa", p.ENa());
 
-            // utility method for optional entries
-            java.util.function.BiConsumer<String, Double> putIfNotNull = (k,v) -> {
-                if (v != null) paramMap.put(k, v);
-            };
             paramMap.put("ENb", p.ENb());
             paramMap.put("ENc", p.ENc());
             paramMap.put("Eb", p.Eb());
@@ -223,6 +226,19 @@ public class BService {
                 names.setCodeB12(namesDto.codeB12());
                 names.setCodeB13(namesDto.codeB13());
                 names.setCodeB21(namesDto.codeB21());
+                names.setCodeB22(namesDto.codeB22());
+                names.setCodeB23(namesDto.codeB23());
+                names.setCodeB24(namesDto.codeB24());
+                names.setCodeB25(namesDto.codeB25());
+                names.setCodeB26(namesDto.codeB26());
+                names.setCodeB31(namesDto.codeB31());
+                names.setCodeB32(namesDto.codeB32());
+                names.setCodeB33(namesDto.codeB33());
+                names.setCodeB34(namesDto.codeB34());
+                names.setCodeB41(namesDto.codeB41());
+                names.setCodeB42(namesDto.codeB42());
+                names.setCodeB43(namesDto.codeB43());
+                names.setCodeB44(namesDto.codeB44());
                 namesRepo.save(names);
             }
 
@@ -400,6 +416,11 @@ public class BService {
                 names.setCodeB31(dto.codeB31());
                 names.setCodeB32(dto.codeB32());
                 names.setCodeB33(dto.codeB33());
+                names.setCodeB34(dto.codeB34());
+                names.setCodeB41(dto.codeB41());
+                names.setCodeB42(dto.codeB42());
+                names.setCodeB43(dto.codeB43());
+                names.setCodeB44(dto.codeB44());
         namesRepo.save(names);
     }
 

@@ -67,10 +67,10 @@ public class BController {
     }
 
     /**
-     * Обновление названий метрик для одного результата (B11/B12/B13/B21).
+     * Обновление названий метрик для одного результата (поддерживает B11..B44).
      */
     @PutMapping("/metric-names")
-    @Operation(summary = "Обновить названия метрик B11/B12/B13/B21 для конкретного результата")
+    @Operation(summary = "Обновить названия метрик (поддерживает B11..B44) для конкретного результата")
     public void updateMetricNames(@RequestBody MetricNamesDto dto) {
         bService.updateMetricNames(dto);
     }

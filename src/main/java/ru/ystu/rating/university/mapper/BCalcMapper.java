@@ -69,6 +69,19 @@ public final class BCalcMapper {
         String codeB12 = names != null ? names.getCodeB12() : "B12";
         String codeB13 = names != null ? names.getCodeB13() : "B13";
         String codeB21 = names != null ? names.getCodeB21() : "B21";
+        String codeB22 = names != null ? names.getCodeB22() : "B22";
+        String codeB23 = names != null ? names.getCodeB23() : "B23";
+        String codeB24 = names != null ? names.getCodeB24() : "B24";
+        String codeB25 = names != null ? names.getCodeB25() : "B25";
+        String codeB26 = names != null ? names.getCodeB26() : "B26";
+        String codeB31 = names != null ? names.getCodeB31() : "B31";
+        String codeB32 = names != null ? names.getCodeB32() : "B32";
+        String codeB33 = names != null ? names.getCodeB33() : "B33";
+        String codeB34 = names != null ? names.getCodeB34() : "B34";
+        String codeB41 = names != null ? names.getCodeB41() : "B41";
+        String codeB42 = names != null ? names.getCodeB42() : "B42";
+        String codeB43 = names != null ? names.getCodeB43() : "B43";
+        String codeB44 = names != null ? names.getCodeB44() : "B44";
 
         return new BCalcDto(
                 calcResultId,
