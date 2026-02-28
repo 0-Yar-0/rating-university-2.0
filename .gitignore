@@ -1,0 +1,17 @@
+*.iml
+*.ipr
+*.iws
+*.ids
+*.log
+*.temp
+.idea
+.gradle
+build
+classes
+node_modules
+logs
+/configurator/
+/reports/
+.activemq-data
+*.DS_Store
+Procfile
