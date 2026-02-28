@@ -71,11 +71,13 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
+                        // authentication endpoints are open
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login"
                         ).permitAll()
 
+                        // swagger should only be accessible to admins
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
@@ -83,8 +85,10 @@ public class SecurityConfig {
                                 "/v3/api-docs.yaml"
                         ).hasRole("ADMIN")
 
-                        .requestMatchers("/api/**").permitAll()
+                        // all other API calls require a logged-in user
+                        .requestMatchers("/api/**").authenticated()
 
+                        // static resources, etc
                         .anyRequest().permitAll()
                 )
                 .logout(logout -> logout

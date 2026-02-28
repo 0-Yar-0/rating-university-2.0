@@ -7,20 +7,26 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class CorsConfig {
+
+    @Value("${app.cors.allowed-origins:https://rating-university-web-v2-1.onrender.com,https://rating-university-web.onrender.com,http://localhost:5173}")
+    private String allowedOriginsProperty;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
 
-        // домен фронта
-        cfg.setAllowedOrigins(List.of(
-                "https://rating-university-web-v2-1.onrender.com",
-                "https://rating-university-web.onrender.com",
-                "http://localhost:5173"
-        ));
+        // домен(ы) фронта — читаем из настроек, при отсутствии используем значения по-умолчанию
+        List<String> allowedOrigins = Arrays.stream(allowedOriginsProperty.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+        cfg.setAllowedOrigins(allowedOrigins);
+
 
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Content-Type", "X-Requested-With", "Accept", "Origin"));
