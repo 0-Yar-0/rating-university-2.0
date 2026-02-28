@@ -58,5 +58,15 @@ public interface DataRepository extends JpaRepository<Data, Long> {
     List<Data> findAllByAppUserOrderByIterAscClassTypeIdAscYearDataAsc(AppUser appUser);
 
     void deleteAllByAppUser(AppUser appUser);
+
+    /**
+     * Remove specific record when re-saving same year/iter to avoid unique constraint
+     */
+    void deleteByAppUserAndClassTypeAndIterAndYearData(
+            AppUser appUser,
+            RatingClass classType,
+            Integer iter,
+            Integer yearData
+    );
 }
 

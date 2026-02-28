@@ -2,6 +2,8 @@ package ru.ystu.rating.university.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.ystu.rating.university.dto.*;
 import ru.ystu.rating.university.model.AppUser;
 import ru.ystu.rating.university.model.UserIterState;
@@ -22,16 +24,21 @@ public class RatingService {
     private final AService aService;
     // в будущем: VService
 
+    // used to convert loosely-typed JSON payloads into strong DTOs
+    private final ObjectMapper mapper;
+
     public RatingService(AppUserRepository userRepo,
                          DataRepository dataRepo,
                          UserIterStateRepository userIterStateRepo,
                          BService bService,
-                         AService aService) {
+                         AService aService,
+                         ObjectMapper mapper) {
         this.userRepo = userRepo;
         this.dataRepo = dataRepo;
         this.userIterStateRepo = userIterStateRepo;
         this.bService = bService;
         this.aService = aService;
+        this.mapper = mapper;
     }
 
     // ========================================================================
@@ -65,8 +72,16 @@ public class RatingService {
 
                 switch (classType) {
                     case "B" -> {
-                        @SuppressWarnings("unchecked")
-                        List<BParamsDto> bParams = (List<BParamsDto>) (List<?>) block.data();
+                        // convert the generic `data` list into proper BParamsDto objects
+                        List<BParamsDto> bParams;
+                        try {
+                            bParams = mapper.convertValue(
+                                    block.data(),
+                                    new TypeReference<List<BParamsDto>>() {}
+                            );
+                        } catch (Exception ex) {
+                            throw new IllegalArgumentException("Invalid parameters for class B", ex);
+                        }
                         BMetricNamesDto names = block.names();
 
                         List<BCalcDto> bResults = bService.saveParamsAndComputeForB(

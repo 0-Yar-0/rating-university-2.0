@@ -71,8 +71,11 @@ public class BService {
 
         for (BParamsDto p : yearParams) {
 
-            Data d = new Data();
-            d.setAppUser(user);
+            // if the client resubmits parameters for the same year/iter we should
+            // overwrite existing row rather than blow up with constraint violation
+            dataRepo.deleteByAppUserAndClassTypeAndIterAndYearData(
+                    user, bClass, iter, p.year());
+
             d.setClassType(bClass);
             d.setIter(iter);
             d.setYearData(p.year());
