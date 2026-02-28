@@ -32,6 +32,8 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// in-memory database used during tests to satisfy DataSource requirement
+	testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {

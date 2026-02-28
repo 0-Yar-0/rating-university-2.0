@@ -24,8 +24,11 @@ public class DocumentService {
     public DocumentCalcDto computeAll(DocumentParamsDto in) {
         Map<String, Double> out = new HashMap<>();
 
-        // -- helper to fetch params --
-        java.util.function.Function<String, Double> v = k -> in.get(k);
+        // -- helper to fetch params; treat missing or null values as zero
+        java.util.function.Function<String, Double> v = k -> {
+            Double val = in.get(k);
+            return val == null ? 0.0 : val;
+        };
 
         // -----------------------
         // 1. коррективный коэфф. и сводная оценка
@@ -106,7 +109,9 @@ public class DocumentService {
         double acc = v.apply("ACC");
         double b22raw = Normalizer.safeDiv(nmp + 3.0 * (acp + opc + acc), nbp);
         out.put("B22_raw", b22raw);
-        double b22 = Normalizer.clamp01(b22raw, 0.0, 0.25) * 6.0;
+        // coefficient was incorrectly *6.0 previously; weight should be
+        // the normalized raw value itself (0‑1) as per document spec.
+        double b22 = Normalizer.clamp01(b22raw, 0.0, 0.25);
         out.put("B22", b22);
 
         // B23 = (0.25*PKP + PPP) / (NP + NOA)
