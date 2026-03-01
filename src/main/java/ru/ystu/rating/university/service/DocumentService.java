@@ -118,12 +118,16 @@ public class DocumentService {
 
         // B23 = (0.25*PKP + PPP) / (NP + NOA)
         // where:
-        // NP  = 1.0*No + 0.25*Nv + 0.1*Nz
+        // NP  = 1.0*NPo + 0.25*NPv + 0.1*NPz
         // PKP = 1.0*KPo + 0.25*KPv + 0.1*KPz
         // PPP = 1.0*PPPo + 0.25*PPPv + 0.1*PPPz
         double pkp = 1.0 * v.apply("KPo") + 0.25 * v.apply("KPv") + 0.1 * v.apply("KPz");
         double ppp = 1.0 * v.apply("PPPo") + 0.25 * v.apply("PPPv") + 0.1 * v.apply("PPPz");
-        double np = 1.0 * v.apply("No") + 0.25 * v.apply("Nv") + 0.1 * v.apply("Nz");
+        // backward compatibility: if NPo/NPv/NPz are missing, fallback to legacy No/Nv/Nz
+        double npo = firstPresent(in, "NPo", "No");
+        double npv = firstPresent(in, "NPv", "Nv");
+        double npz = firstPresent(in, "NPz", "Nz");
+        double np = 1.0 * npo + 0.25 * npv + 0.1 * npz;
         double noa = v.apply("NOA");
         double b23raw = Normalizer.safeDiv(0.25 * pkp + ppp, np + noa);
         out.put("B23_raw", b23raw);
