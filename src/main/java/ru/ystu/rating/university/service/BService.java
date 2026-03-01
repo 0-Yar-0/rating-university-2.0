@@ -67,6 +67,11 @@ public class BService {
      */
     @Transactional
     public List<BCalcDto> saveParamsAndComputeForB(AppUser user, int iter, List<BParamsDto> yearParams, BMetricNamesDto namesDto) {
+                return saveParamsAndComputeForB(user, iter, yearParams, null, namesDto);
+        }
+
+        @Transactional
+        public List<BCalcDto> saveParamsAndComputeForB(AppUser user, int iter, List<BParamsDto> yearParams, List<Map<String, Object>> rawYearParams, BMetricNamesDto namesDto) {
         if (yearParams == null || yearParams.isEmpty()) {
             return List.of();
         }
@@ -76,7 +81,8 @@ public class BService {
 
         List<BCalcDto> result = new ArrayList<>();
 
-        for (BParamsDto p : yearParams) {
+                for (int idx = 0; idx < yearParams.size(); idx++) {
+                        BParamsDto p = yearParams.get(idx);
 
             // if the client resubmits parameters for the same year/iter we should
             // overwrite existing row rather than blow up with constraint violation
@@ -92,7 +98,13 @@ public class BService {
 
             ParamsSet ps = new ParamsSet();
             ps.setData(d);
-            ps.setParams(BParamsMapper.toJson(p));
+                        Map<String, Object> rawParams = BParamsMapper.toJson(p);
+                        if (rawYearParams != null && idx < rawYearParams.size() && rawYearParams.get(idx) != null) {
+                                rawParams = new HashMap<>(rawYearParams.get(idx));
+                        }
+                        rawParams.remove("year");
+                        rawParams.remove("iteration");
+                        ps.setParams(rawParams);
             paramsRepo.save(ps);
 
             BCalcDto calcDto = bMathCalculator.computeBForYear(p, iter);
@@ -101,6 +113,12 @@ public class BService {
             // produce the extended metrics; we copy everything that may be
             // relevant from BParamsDto.
             Map<String, Double> paramMap = new HashMap<>();
+                        for (Map.Entry<String, Object> e : rawParams.entrySet()) {
+                                Double num = toDoubleOrNull(e.getValue());
+                                if (num != null) {
+                                        paramMap.put(e.getKey(), num);
+                                }
+                        }
             paramMap.put("ENa", p.ENa());
 
             paramMap.put("ENb", p.ENb());
@@ -269,10 +287,11 @@ public class BService {
                 user, bClass, currentIterB
         );
 
-        List<BParamsDto> dtoList = rows.stream()
+                List<Map<String, Object>> dtoList = rows.stream()
                 .map(d -> {
-                    Map<String, Object> json = d.getParamsSet().getParams();
-                    return BParamsMapper.fromJson(d.getYearData(), json);
+                                        Map<String, Object> json = new HashMap<>(d.getParamsSet().getParams());
+                                        json.put("year", d.getYearData());
+                                        return json;
                 })
                 .toList();
 
@@ -293,10 +312,11 @@ public class BService {
             return new ClassParamsBlockDto("B", List.of(), null);
         }
 
-        List<BParamsDto> dtoList = rows.stream()
+                List<Map<String, Object>> dtoList = rows.stream()
                 .map(d -> {
-                    Map<String, Object> json = d.getParamsSet().getParams();
-                    return BParamsMapper.fromJson(d.getYearData(), json);
+                                        Map<String, Object> json = new HashMap<>(d.getParamsSet().getParams());
+                                        json.put("year", d.getYearData());
+                                        return json;
                 })
                 .toList();
 
@@ -423,5 +443,23 @@ public class BService {
                 names.setCodeB44(dto.codeB44());
         namesRepo.save(names);
     }
+
+        private static Double toDoubleOrNull(Object value) {
+                if (value == null) {
+                        return null;
+                }
+                if (value instanceof Number n) {
+                        return n.doubleValue();
+                }
+                String s = value.toString().trim();
+                if (s.isEmpty()) {
+                        return null;
+                }
+                try {
+                        return Double.parseDouble(s.replace(',', '.'));
+                } catch (NumberFormatException ex) {
+                        return null;
+                }
+        }
 
 }

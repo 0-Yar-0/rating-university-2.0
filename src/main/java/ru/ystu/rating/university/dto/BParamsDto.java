@@ -1,5 +1,8 @@
 package ru.ystu.rating.university.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record BParamsDto(
         Integer year,
         // original B11..B21 inputs

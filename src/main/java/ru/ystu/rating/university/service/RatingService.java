@@ -72,6 +72,16 @@ public class RatingService {
 
                 switch (classType) {
                     case "B" -> {
+                        List<Map<String, Object>> rawBParams;
+                        try {
+                            rawBParams = mapper.convertValue(
+                                    block.data(),
+                                    new TypeReference<List<Map<String, Object>>>() {}
+                            );
+                        } catch (Exception ex) {
+                            throw new IllegalArgumentException("Invalid raw parameters for class B", ex);
+                        }
+
                         // convert the generic `data` list into proper BParamsDto objects
                         List<BParamsDto> bParams;
                         try {
@@ -88,6 +98,7 @@ public class RatingService {
                                 user,
                                 nextIter,
                                 bParams,
+                            rawBParams,
                                 names
                         );
                         resultBlocks.add(new ClassCalcBlockDto("B", bResults));
