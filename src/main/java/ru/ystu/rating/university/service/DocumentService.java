@@ -215,17 +215,19 @@ public class DocumentService {
 
         // --------------------------------------------------
         // B34 — востребованность на рынке труда
-        // B34_raw = (Σ NR[Y], Y=2023..2023+k-1) / k
+        // B34_raw = (Σ NR[Y], Y=2023..2023+k-1) / k34,
+        // где k34 — количество лет с ненулевым NR[Y].
         double sum34 = 0.0;
+        int k34 = 0;
         for (int i = 0; i < kYears; i++) {
             int year = 2023 + i;
-            int kyear
-            sum34 += firstPresent(in, "NR" + year);
-            if firstPresent(in, "NR" + year)!=0 {
-                kyear++;
+            double nr = firstPresent(in, "NR" + year);
+            sum34 += nr;
+            if (nr != 0.0) {
+                k34++;
             }
         }
-        double b34raw = sum34 / kYears;
+        double b34raw = k34 > 0 ? (sum34 / k34) : 0.0;
         out.put("B34_raw", b34raw);
         out.put("B34", Normalizer.clamp01(b34raw, 0.3, 1.5) * 2.0);
 
