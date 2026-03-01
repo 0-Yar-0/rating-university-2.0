@@ -13,6 +13,7 @@ import ru.ystu.rating.university.repository.UserIterStateRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RatingService {
