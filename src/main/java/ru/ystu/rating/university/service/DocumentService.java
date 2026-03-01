@@ -219,7 +219,11 @@ public class DocumentService {
         double sum34 = 0.0;
         for (int i = 0; i < kYears; i++) {
             int year = 2023 + i;
+            int kyear
             sum34 += firstPresent(in, "NR" + year);
+            if firstPresent(in, "NR" + year)!=0 {
+                kyear++;
+            }
         }
         double b34raw = sum34 / kYears;
         out.put("B34_raw", b34raw);
