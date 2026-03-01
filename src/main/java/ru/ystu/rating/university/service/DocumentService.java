@@ -109,9 +109,7 @@ public class DocumentService {
         double acc = v.apply("ACC");
         double b22raw = Normalizer.safeDiv(nmp + 3.0 * (acp + opc + acc), nbp);
         out.put("B22_raw", b22raw);
-        // coefficient was incorrectly *6.0 previously; weight should be
-        // the normalized raw value itself (0‑1) as per document spec.
-        double b22 = Normalizer.clamp01(b22raw, 0.0, 0.25);
+        double b22 = Normalizer.clamp01(b22raw, 0.0, 0.25) * 6.0;
         out.put("B22", b22);
 
         // B23 = (0.25*PKP + PPP) / (NP + NOA)
@@ -124,9 +122,12 @@ public class DocumentService {
         double b23 = Normalizer.clamp01(b23raw, 0.0, 0.20) * 6.0;
         out.put("B23", b23);
 
-        // B24 = NAP / PN  (PN is already computed)
+        // B24 = NAP / PN
+        // PN может не передаваться как PNo/PNv/PNz для класса B, поэтому
+        // используем fallback на NBP (в типовых шаблонах PN = NBP).
         double nap = v.apply("NAP");
-        double b24raw = Normalizer.safeDiv(nap, pn);
+        double pnForB24 = pn > 0 ? pn : nbp;
+        double b24raw = Normalizer.safeDiv(nap, pnForB24);
         out.put("B24_raw", b24raw);
         double b24 = Normalizer.clamp01(b24raw, 0.0, 0.5) * 6.0;
         out.put("B24", b24);
@@ -183,9 +184,9 @@ public class DocumentService {
         k += nr2024 > 0 ? 1 : 0;
         k += nr2025 > 0 ? 1 : 0;
         if (k == 0) k = 1;
-        double b34raw = (nr2023 + nr2024 + nr2025) * 100.0 / k;
+        double b34raw = (nr2023 + nr2024 + nr2025) / k;
         out.put("B34_raw", b34raw);
-        out.put("B34", Normalizer.clamp01(b34raw, 0.0, 1.0)); // weight not specified, keep raw
+        out.put("B34", Normalizer.clamp01(b34raw, 0.3, 1.5) * 2.0);
 
         // B41 — публикации на 100 НПР
         double wl2022 = v.apply("WL2022");
@@ -201,7 +202,7 @@ public class DocumentService {
         if (npr2024 > 0) { sum41 += wl2024 / npr2024; cnt41++; }
         double b41raw = cnt41 > 0 ? (sum41 / cnt41) * 100.0 : 0.0;
         out.put("B41_raw", b41raw);
-        out.put("B41", b41raw);
+        out.put("B41", Normalizer.clamp01(b41raw, 5.0, 100.0) * 5.0);
 
         // B42 — доходы от НИОКР на 1 НПР
         double dn2022 = v.apply("DN2022");
@@ -214,7 +215,7 @@ public class DocumentService {
         if (npr2024 > 0) { sum42 += dn2024 / npr2024; cnt42++; }
         double b42raw = cnt42 > 0 ? sum42 / cnt42 : 0.0;
         out.put("B42_raw", b42raw);
-        out.put("B42", b42raw);
+        out.put("B42", Normalizer.clamp01(b42raw, 100.0, 1000.0) * 5.0);
 
         // B43 — доля иностранных обучающихся
         double io = v.apply("Io");
@@ -226,7 +227,7 @@ public class DocumentService {
         double denom43 = no + 0.25 * nv + 0.1 * nz;
         double b43raw = denom43 == 0 ? 0.0 : (io + 0.25 * iv + 0.1 * iz) / denom43 * 100.0;
         out.put("B43_raw", b43raw);
-        out.put("B43", b43raw);
+        out.put("B43", Normalizer.clamp01(b43raw, 1.0, 15.0) * 5.0);
 
         // B44 — доходы на 1 обучающегося
         double od2022 = v.apply("OD2022");
@@ -242,7 +243,7 @@ public class DocumentService {
         if (pn2024>0) { sum44 += od2024 / pn2024; cnt44++; }
         double b44raw = cnt44>0 ? sum44 / cnt44 : 0.0;
         out.put("B44_raw", b44raw);
-        out.put("B44", b44raw);
+        out.put("B44", Normalizer.clamp01(b44raw, 50.0, 500.0) * 5.0);
 
         return new DocumentCalcDto(out);
     }
