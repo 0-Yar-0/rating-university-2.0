@@ -78,7 +78,7 @@ public class DocumentService {
         double beta122 = v.apply("beta122");
         double b12raw = Normalizer.safeDiv(beta121, beta122) * 100.0;
         out.put("B12_raw", b12raw);
-        double b12 = Normalizer.clamp01(b12raw, 80.0, 100.0) * 3.0;
+        double b12 = Normalizer.clamp01(b12raw, 80.0, 100.0);
         out.put("B12", b12);
 
         // B13
@@ -102,9 +102,13 @@ public class DocumentService {
         // -----------------------
 
         // B22 = (NMP + 3*(ACP+OPC+ACC)) / NBP
-        double nbp = v.apply("NBP");
-        double nmp = v.apply("NMP");
-        double acp = v.apply("ACP");
+        // where:
+        // NBP = 1.0*NBo + 0.25*NBv + 0.1*NBz
+        // NMP = 1.0*NMo + 0.25*NMv + 0.1*NMz
+        // ACP = 1.0*ACo + 0.25*ACv + 0.1*ACz
+        double nbp = 1.0 * v.apply("NBo") + 0.25 * v.apply("NBv") + 0.1 * v.apply("NBz");
+        double nmp = 1.0 * v.apply("NMo") + 0.25 * v.apply("NMv") + 0.1 * v.apply("NMz");
+        double acp = 1.0 * v.apply("ACo") + 0.25 * v.apply("ACv") + 0.1 * v.apply("ACz");
         double opc = v.apply("OPC");
         double acc = v.apply("ACC");
         double b22raw = Normalizer.safeDiv(nmp + 3.0 * (acp + opc + acc), nbp);
@@ -113,9 +117,13 @@ public class DocumentService {
         out.put("B22", b22);
 
         // B23 = (0.25*PKP + PPP) / (NP + NOA)
-        double pkp = v.apply("PKP");
-        double ppp = v.apply("PPP");
-        double np = v.apply("NP");
+        // where:
+        // NP  = 1.0*No + 0.25*Nv + 0.1*Nz
+        // PKP = 1.0*KPo + 0.25*KPv + 0.1*KPz
+        // PPP = 1.0*PPPo + 0.25*PPPv + 0.1*PPPz
+        double pkp = 1.0 * v.apply("KPo") + 0.25 * v.apply("KPv") + 0.1 * v.apply("KPz");
+        double ppp = 1.0 * v.apply("PPPo") + 0.25 * v.apply("PPPv") + 0.1 * v.apply("PPPz");
+        double np = 1.0 * v.apply("No") + 0.25 * v.apply("Nv") + 0.1 * v.apply("Nz");
         double noa = v.apply("NOA");
         double b23raw = Normalizer.safeDiv(0.25 * pkp + ppp, np + noa);
         out.put("B23_raw", b23raw);
@@ -123,29 +131,61 @@ public class DocumentService {
         out.put("B23", b23);
 
         // B24 = NAP / PN
-        // PN может не передаваться как PNo/PNv/PNz для класса B, поэтому
-        // используем fallback на NBP (в типовых шаблонах PN = NBP).
-        double nap = v.apply("NAP");
-        double pnForB24 = pn > 0 ? pn : nbp;
+        // where:
+        // NAP = 1.0*NAo + 0.25*NAv + 0.1*NAz
+        // PN  = 1.0*PNo + 0.25*PNv + 0.1*PNz
+        double nap = 1.0 * v.apply("NAo") + 0.25 * v.apply("NAv") + 0.1 * v.apply("NAz");
+        double pnForB24 = pn;
         double b24raw = Normalizer.safeDiv(nap, pnForB24);
         out.put("B24_raw", b24raw);
         double b24 = Normalizer.clamp01(b24raw, 0.0, 0.5) * 6.0;
         out.put("B24", b24);
 
-        // B25: caller may supply raw value or underlying numbers
-        if (in.values().containsKey("B25_o")) {
-            double b25raw = v.apply("B25_o");
-            out.put("B25_raw", b25raw);
-            double b25 = Normalizer.clamp01(b25raw, 0.0, 40.0) * 1.0;
-            out.put("B25", b25);
+        // B25_o = (Σ(ЧПСiY/ЧПiY), Y=2022..2022+k-1) * 100 / k
+        int requestedKYears = (int) Math.round(firstPresent(in, "k", "K"));
+        int kYears = requestedKYears > 0 ? requestedKYears : 3;
+        int startYear = 2022;
+
+        double sum25 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = startYear + i;
+            double chps = firstPresent(in,
+                "ЧПСi" + year,
+                "CHPSi" + year,
+                "CPSi" + year);
+            double chp = firstPresent(in,
+                "ЧПi" + year,
+                "CHPi" + year,
+                "CPi" + year);
+            if (chp > 0) {
+            sum25 += chps / chp;
+            }
         }
-        // B26: similar
-        if (in.values().containsKey("B26_o")) {
-            double b26raw = v.apply("B26_o");
-            out.put("B26_raw", b26raw);
-            double b26 = Normalizer.clamp01(b26raw, 0.0, 40.0) * 1.0;
-            out.put("B26", b26);
+        double b25raw = (sum25 * 100.0) / kYears;
+        out.put("B25_raw", b25raw);
+        double b25 = Normalizer.clamp01(b25raw, 0.0, 40.0) * 1.0;
+        out.put("B25", b25);
+
+        // B26_o = (Σ(ЧОСiY/ЧОiY), Y=2022..2022+k-1) * 100 / k
+        double sum26 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = startYear + i;
+            double chos = firstPresent(in,
+                "ЧОСi" + year,
+                "CHOSi" + year,
+                "COSi" + year);
+            double cho = firstPresent(in,
+                "ЧОi" + year,
+                "CHOi" + year,
+                "COi" + year);
+            if (cho > 0) {
+            sum26 += chos / cho;
+            }
         }
+        double b26raw = (sum26 * 100.0) / kYears;
+        out.put("B26_raw", b26raw);
+        double b26 = Normalizer.clamp01(b26raw, 0.0, 40.0) * 1.0;
+        out.put("B26", b26);
 
         // B31
         double ut = v.apply("UT");
@@ -175,45 +215,43 @@ public class DocumentService {
 
         // --------------------------------------------------
         // B34 — востребованность на рынке труда
-        // raw index values may be missing; treat null as 0
-        double nr2023 = v.apply("NR2023");
-        double nr2024 = v.apply("NR2024");
-        double nr2025 = v.apply("NR2025");
-        int k = 0;
-        k += nr2023 > 0 ? 1 : 0;
-        k += nr2024 > 0 ? 1 : 0;
-        k += nr2025 > 0 ? 1 : 0;
-        if (k == 0) k = 1;
-        double b34raw = (nr2023 + nr2024 + nr2025) / k;
+        // B34_raw = (Σ NR[Y], Y=2023..2023+k-1) / k
+        double sum34 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2023 + i;
+            sum34 += firstPresent(in, "NR" + year);
+        }
+        double b34raw = sum34 / kYears;
         out.put("B34_raw", b34raw);
         out.put("B34", Normalizer.clamp01(b34raw, 0.3, 1.5) * 2.0);
 
         // B41 — публикации на 100 НПР
-        double wl2022 = v.apply("WL2022");
-        double wl2023 = v.apply("WL2023");
-        double wl2024 = v.apply("WL2024");
-        double npr2022 = v.apply("NPR2022");
-        double npr2023 = v.apply("NPR2023");
-        double npr2024 = v.apply("NPR2024");
+        // B41_raw = (Σ (WL[Y] / NPR[Y]), Y=2022..2022+k-1) * 100 / k
         double sum41 = 0;
-        int cnt41 = 0;
-        if (npr2022 > 0) { sum41 += wl2022 / npr2022; cnt41++; }
-        if (npr2023 > 0) { sum41 += wl2023 / npr2023; cnt41++; }
-        if (npr2024 > 0) { sum41 += wl2024 / npr2024; cnt41++; }
-        double b41raw = cnt41 > 0 ? (sum41 / cnt41) * 100.0 : 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double wl = firstPresent(in, "WL" + year);
+            double npr = firstPresent(in, "NPR" + year);
+            if (npr > 0) {
+                sum41 += wl / npr;
+            }
+        }
+        double b41raw = (sum41 * 100.0) / kYears;
         out.put("B41_raw", b41raw);
         out.put("B41", Normalizer.clamp01(b41raw, 5.0, 100.0) * 5.0);
 
         // B42 — доходы от НИОКР на 1 НПР
-        double dn2022 = v.apply("DN2022");
-        double dn2023 = v.apply("DN2023");
-        double dn2024 = v.apply("DN2024");
+        // B42_raw = (Σ (DN[Y] / NPR[Y]), Y=2022..2022+k-1) / k
         double sum42 = 0;
-        int cnt42 = 0;
-        if (npr2022 > 0) { sum42 += dn2022 / npr2022; cnt42++; }
-        if (npr2023 > 0) { sum42 += dn2023 / npr2023; cnt42++; }
-        if (npr2024 > 0) { sum42 += dn2024 / npr2024; cnt42++; }
-        double b42raw = cnt42 > 0 ? sum42 / cnt42 : 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double dn = firstPresent(in, "DN" + year);
+            double npr = firstPresent(in, "NPR" + year);
+            if (npr > 0) {
+                sum42 += dn / npr;
+            }
+        }
+        double b42raw = sum42 / kYears;
         out.put("B42_raw", b42raw);
         out.put("B42", Normalizer.clamp01(b42raw, 100.0, 1000.0) * 5.0);
 
@@ -230,21 +268,38 @@ public class DocumentService {
         out.put("B43", Normalizer.clamp01(b43raw, 1.0, 15.0) * 5.0);
 
         // B44 — доходы на 1 обучающегося
-        double od2022 = v.apply("OD2022");
-        double od2023 = v.apply("OD2023");
-        double od2024 = v.apply("OD2024");
-        double pn2022 = v.apply("PN2022");
-        double pn2023 = v.apply("PN2023");
-        double pn2024 = v.apply("PN2024");
+        // where PN_k = 1.0*NO_k + 0.25*NV_k + 0.1*NZ_k + NOA_k
+        // B44_raw = (Σ (OD[Y] / PN[Y]), Y=2022..2022+k-1) / k
         double sum44 = 0;
-        int cnt44 = 0;
-        if (pn2022>0) { sum44 += od2022 / pn2022; cnt44++; }
-        if (pn2023>0) { sum44 += od2023 / pn2023; cnt44++; }
-        if (pn2024>0) { sum44 += od2024 / pn2024; cnt44++; }
-        double b44raw = cnt44>0 ? sum44 / cnt44 : 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double od = firstPresent(in, "OD" + year);
+            double noYear = firstPresent(in, "NO" + year, "No" + year);
+            double nvYear = firstPresent(in, "NV" + year, "Nv" + year);
+            double nzYear = firstPresent(in, "NZ" + year, "Nz" + year);
+            double noaYear = firstPresent(in, "NOA" + year, "Noa" + year);
+            double pnYear = 1.0 * noYear + 0.25 * nvYear + 0.1 * nzYear + noaYear;
+            if (pnYear <= 0) {
+                pnYear = firstPresent(in, "PN" + year);
+            }
+            if (pnYear > 0) {
+                sum44 += od / pnYear;
+            }
+        }
+        double b44raw = sum44 / kYears;
         out.put("B44_raw", b44raw);
         out.put("B44", Normalizer.clamp01(b44raw, 50.0, 500.0) * 5.0);
 
         return new DocumentCalcDto(out);
+    }
+
+    private static double firstPresent(DocumentParamsDto in, String... keys) {
+        for (String key : keys) {
+            if (in.values().containsKey(key)) {
+                Double value = in.values().get(key);
+                return value == null ? 0.0 : value;
+            }
+        }
+        return 0.0;
     }
 }

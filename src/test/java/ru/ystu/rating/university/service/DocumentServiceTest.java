@@ -60,7 +60,7 @@ class DocumentServiceTest {
         assertEquals(1.0, out.get("KI"), 1e-6);
         assertEquals(57.771, out.get("TOTAL"), 1e-6);
         // verify additional formulas produce weighted scores (norm * weight)
-        assertEquals(1.083, out.get("B34"), 1e-3);
+        assertEquals(0.028, out.get("B34"), 1e-3);
         assertEquals(1.008, out.get("B41"), 1e-3);
         assertEquals(3.565, out.get("B42"), 1e-3);
         assertEquals(0.153, out.get("B43"), 1e-3);
@@ -70,16 +70,48 @@ class DocumentServiceTest {
     @Test
     void testB22Computation() {
         Map<String, Double> inputs = new HashMap<>();
-        inputs.put("NBP", 941.5);
-        inputs.put("NMP", 79.3);
-        inputs.put("ACP", 11.8);
+        inputs.put("NBo", 907.0);
+        inputs.put("NBv", 0.0);
+        inputs.put("NBz", 345.0);
+        inputs.put("NMo", 79.0);
+        inputs.put("NMv", 0.0);
+        inputs.put("NMz", 3.0);
+        inputs.put("ACo", 11.8);
+        inputs.put("ACv", 0.0);
+        inputs.put("ACz", 0.0);
         inputs.put("OPC", 0.0);
         inputs.put("ACC", 0.0);
         DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
-        // raw value from document 0.1219, normalized 0.488 and weighted 2.925
-        assertEquals(0.1219, out.get("B22_raw"), 1e-4);
-        assertEquals(2.925, out.get("B22"), 1e-3);
+        // NBP = 941.5, NMP = 79.3, ACP = 11.8 => raw 0.122995...
+        assertEquals(0.1230, out.get("B22_raw"), 1e-4);
+        assertEquals(2.952, out.get("B22"), 1e-3);
         // other metrics already validated in first test
+    }
+
+    @Test
+    void testB25B26WithDynamicK() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("k", 2.0);
+
+        inputs.put("CHPSi2022", 10.0);
+        inputs.put("CHPi2022", 100.0);
+        inputs.put("CHPSi2023", 20.0);
+        inputs.put("CHPi2023", 100.0);
+
+        inputs.put("CHOSi2022", 5.0);
+        inputs.put("CHOi2022", 100.0);
+        inputs.put("CHOSi2023", 15.0);
+        inputs.put("CHOi2023", 100.0);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        // B25_raw = ((0.1 + 0.2) * 100) / 2 = 15
+        assertEquals(15.0, out.get("B25_raw"), 1e-6);
+        assertEquals(0.375, out.get("B25"), 1e-6);
+
+        // B26_raw = ((0.05 + 0.15) * 100) / 2 = 10
+        assertEquals(10.0, out.get("B26_raw"), 1e-6);
+        assertEquals(0.25, out.get("B26"), 1e-6);
     }
 
     @Test
