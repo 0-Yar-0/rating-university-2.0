@@ -78,7 +78,7 @@ public class DocumentService {
         double beta122 = v.apply("beta122");
         double b12raw = Normalizer.safeDiv(beta121, beta122) * 100.0;
         out.put("B12_raw", b12raw);
-        double b12 = Normalizer.clamp01(b12raw, 80.0, 100.0);
+        double b12 = Normalizer.clamp01(b12raw, 80.0, 100.0)* 3.0;
         out.put("B12", b12);
 
         // B13
