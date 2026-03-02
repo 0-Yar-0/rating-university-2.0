@@ -89,6 +89,37 @@ class DocumentServiceTest {
     }
 
     @Test
+    void testB22ComputationFromAggregatedInputs() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("NBP", 941.5);
+        inputs.put("NMP", 79.3);
+        inputs.put("ACP", 11.8);
+        inputs.put("OPC", 0.0);
+        inputs.put("ACC", 0.0);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        assertEquals(0.1230, out.get("B22_raw"), 1e-4);
+        assertEquals(2.952, out.get("B22"), 1e-3);
+    }
+
+    @Test
+    void testB24ComputationWithAggregatedNapAndPnFallback() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("NAP", 100.0);
+        // no PNo/PNv/PNz -> PN should fallback to No/Nv/Nz
+        inputs.put("No", 200.0);
+        inputs.put("Nv", 0.0);
+        inputs.put("Nz", 0.0);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        assertEquals(200.0, out.get("PN"), 1e-6);
+        assertEquals(0.5, out.get("B24_raw"), 1e-6);
+        assertEquals(6.0, out.get("B24"), 1e-6);
+    }
+
+    @Test
     void testB25B26WithDynamicK() {
         Map<String, Double> inputs = new HashMap<>();
         inputs.put("k", 2.0);

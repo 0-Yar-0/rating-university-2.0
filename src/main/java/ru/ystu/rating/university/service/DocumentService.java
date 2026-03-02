@@ -33,9 +33,9 @@ public class DocumentService {
         // -----------------------
         // 1. коррективный коэфф. и сводная оценка
         // -----------------------
-        double pno = v.apply("PNo");
-        double pnv = v.apply("PNv");
-        double pnz = v.apply("PNz");
+        double pno = firstPresent(in, "PNo", "No");
+        double pnv = firstPresent(in, "PNv", "Nv");
+        double pnz = firstPresent(in, "PNz", "Nz");
         double pn = 1.0 * pno + 0.25 * pnv + 0.1 * pnz;
         out.put("PN_raw", pn);
         out.put("PN", pn);
@@ -106,9 +106,15 @@ public class DocumentService {
         // NBP = 1.0*NBo + 0.25*NBv + 0.1*NBz
         // NMP = 1.0*NMo + 0.25*NMv + 0.1*NMz
         // ACP = 1.0*ACo + 0.25*ACv + 0.1*ACz
-        double nbp = 1.0 * v.apply("NBo") + 0.25 * v.apply("NBv") + 0.1 * v.apply("NBz");
-        double nmp = 1.0 * v.apply("NMo") + 0.25 * v.apply("NMv") + 0.1 * v.apply("NMz");
-        double acp = 1.0 * v.apply("ACo") + 0.25 * v.apply("ACv") + 0.1 * v.apply("ACz");
+        double nbp = in.values().containsKey("NBP")
+            ? v.apply("NBP")
+            : 1.0 * v.apply("NBo") + 0.25 * v.apply("NBv") + 0.1 * v.apply("NBz");
+        double nmp = in.values().containsKey("NMP")
+            ? v.apply("NMP")
+            : 1.0 * v.apply("NMo") + 0.25 * v.apply("NMv") + 0.1 * v.apply("NMz");
+        double acp = in.values().containsKey("ACP")
+            ? v.apply("ACP")
+            : 1.0 * v.apply("ACo") + 0.25 * v.apply("ACv") + 0.1 * v.apply("ACz");
         double opc = v.apply("OPC");
         double acc = v.apply("ACC");
         double b22raw = Normalizer.safeDiv(nmp + 3.0 * (acp + opc + acc), nbp);
@@ -138,8 +144,10 @@ public class DocumentService {
         // where:
         // NAP = 1.0*NAo + 0.25*NAv + 0.1*NAz
         // PN  = 1.0*PNo + 0.25*PNv + 0.1*PNz
-        double nap = 1.0 * v.apply("NAo") + 0.25 * v.apply("NAv") + 0.1 * v.apply("NAz");
-        double pnForB24 = pn;
+        double nap = in.values().containsKey("NAP")
+            ? v.apply("NAP")
+            : 1.0 * v.apply("NAo") + 0.25 * v.apply("NAv") + 0.1 * v.apply("NAz");
+        double pnForB24 = in.values().containsKey("PN") ? v.apply("PN") : pn;
         double b24raw = Normalizer.safeDiv(nap, pnForB24);
         out.put("B24_raw", b24raw);
         double b24 = Normalizer.clamp01(b24raw, 0.0, 0.5) * 6.0;
