@@ -236,7 +236,7 @@ public class DocumentService {
         if (in.values().containsKey("B33_o")) {
             double b33raw = v.apply("B33_o");
             out.put("B33_raw", b33raw);
-            double b33 = Normalizer.clamp01(b33raw, 1.0, 1.0) * 1.0;
+            double b33 = b33raw;
             out.put("B33", b33);
         }
 
