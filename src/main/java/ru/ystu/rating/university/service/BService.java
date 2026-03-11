@@ -174,6 +174,9 @@ public class BService {
             putIfNotNull(paramMap, "PNo", p.PNo());
             putIfNotNull(paramMap, "PNv", p.PNv());
             putIfNotNull(paramMap, "PNz", p.PNz());
+            putIfNotNull(paramMap, "Po", p.Po());
+            putIfNotNull(paramMap, "Pv", p.Pv());
+            putIfNotNull(paramMap, "Pz", p.Pz());
             putIfNotNull(paramMap, "DIo", p.DIo());
             putIfNotNull(paramMap, "DIv", p.DIv());
             putIfNotNull(paramMap, "DIz", p.DIz());

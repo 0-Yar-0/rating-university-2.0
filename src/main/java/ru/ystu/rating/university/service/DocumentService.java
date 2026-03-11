@@ -143,12 +143,27 @@ public class DocumentService {
         // B24 = NAP / PN
         // where:
         // NAP = 1.0*NAo + 0.25*NAv + 0.1*NAz
-        // PN  = 1.0*PNo + 0.25*PNv + 0.1*PNz
+        // P   = 1.0*Po + 0.25*Pv + 0.1*Pz
+        // legacy fallback: PNo/PNv/PNz
         double nap = in.values().containsKey("NAP")
             ? v.apply("NAP")
             : 1.0 * v.apply("NAo") + 0.25 * v.apply("NAv") + 0.1 * v.apply("NAz");
-        double pnForB24 = in.values().containsKey("PN") ? v.apply("PN") : pn;
-        double b24raw = Normalizer.safeDiv(nap, pnForB24);
+        double po = firstPresent(in, "Po", "PNo", "No");
+        double pv = firstPresent(in, "Pv", "PNv", "Nv");
+        double pz = firstPresent(in, "Pz", "PNz", "Nz");
+        double p = 1.0 * po + 0.25 * pv + 0.1 * pz;
+        out.put("P_raw", p);
+        double pForB24;
+        if (in.values().containsKey("P")) {
+            pForB24 = v.apply("P");
+        } else if (hasAnyKey(in, "Po", "Pv", "Pz", "PNo", "PNv", "PNz", "No", "Nv", "Nz")) {
+            pForB24 = p;
+        } else if (in.values().containsKey("PN")) {
+            pForB24 = v.apply("PN");
+        } else {
+            pForB24 = 0.0;
+        }
+        double b24raw = Normalizer.safeDiv(nap, pForB24);
         out.put("B24_raw", b24raw);
         double b24 = Normalizer.clamp01(b24raw, 0.0, 0.5) * 6.0;
         out.put("B24", b24);
@@ -221,7 +236,7 @@ public class DocumentService {
         if (in.values().containsKey("B33_o")) {
             double b33raw = v.apply("B33_o");
             out.put("B33_raw", b33raw);
-            double b33 = Normalizer.clamp01(b33raw, 1.0, 5.0) * 12.0;
+            double b33 = Normalizer.clamp01(b33raw, 1.0, 1.0) * 1.0;
             out.put("B33", b33);
         }
 
@@ -319,5 +334,14 @@ public class DocumentService {
             }
         }
         return 0.0;
+    }
+
+    private static boolean hasAnyKey(DocumentParamsDto in, String... keys) {
+        for (String key : keys) {
+            if (in.values().containsKey(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

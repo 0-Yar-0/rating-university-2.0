@@ -102,6 +102,9 @@ public final class BParamsMapper {
         putIfNotNull(m, "DIo", dto.DIo());
         putIfNotNull(m, "DIv", dto.DIv());
         putIfNotNull(m, "DIz", dto.DIz());
+        putIfNotNull(m, "Po", dto.Po());
+        putIfNotNull(m, "Pv", dto.Pv());
+        putIfNotNull(m, "Pz", dto.Pz());
         return m;
     }
 
@@ -192,7 +195,10 @@ public final class BParamsMapper {
                 getDouble(json, "PNz"),
                 getDouble(json, "DIo"),
                 getDouble(json, "DIv"),
-                getDouble(json, "DIz")
+                getDouble(json, "DIz"),
+                getDouble(json, "Po"),
+                getDouble(json, "Pv"),
+                getDouble(json, "Pz")
         );
     }
 

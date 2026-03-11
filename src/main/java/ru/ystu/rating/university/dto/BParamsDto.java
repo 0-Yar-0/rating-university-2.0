@@ -89,7 +89,10 @@ public record BParamsDto(
         Double PNz,
         Double DIo,
         Double DIv,
-        Double DIz
+        Double DIz,
+        Double Po,
+        Double Pv,
+        Double Pz
 ) {
 }
 

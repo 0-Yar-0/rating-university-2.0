@@ -120,6 +120,24 @@ class DocumentServiceTest {
     }
 
     @Test
+    void testB24UsesDedicatedPoPvPzInsteadOfCorrectionPn() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("NAP", 100.0);
+        inputs.put("PNo", 400.0);
+        inputs.put("PNv", 0.0);
+        inputs.put("PNz", 0.0);
+        inputs.put("Po", 200.0);
+        inputs.put("Pv", 0.0);
+        inputs.put("Pz", 0.0);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        assertEquals(400.0, out.get("PN"), 1e-6);
+        assertEquals(0.5, out.get("B24_raw"), 1e-6);
+        assertEquals(6.0, out.get("B24"), 1e-6);
+    }
+
+    @Test
     void testB25B26WithDynamicK() {
         Map<String, Double> inputs = new HashMap<>();
         inputs.put("k", 2.0);
