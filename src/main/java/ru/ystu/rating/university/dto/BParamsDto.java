@@ -61,7 +61,35 @@ public record BParamsDto(
         Double OD2024,
         Double PN2022,
         Double PN2023,
-        Double PN2024
+        Double PN2024,
+        // frontend sub-parameters used in formulas
+        Double NBo,
+        Double NBv,
+        Double NBz,
+        Double NMo,
+        Double NMv,
+        Double NMz,
+        Double ACo,
+        Double ACv,
+        Double ACz,
+        Double KPo,
+        Double KPv,
+        Double KPz,
+        Double PPPo,
+        Double PPPv,
+        Double PPPz,
+        Double NPo,
+        Double NPv,
+        Double NPz,
+        Double NAo,
+        Double NAv,
+        Double NAz,
+        Double PNo,
+        Double PNv,
+        Double PNz,
+        Double DIo,
+        Double DIv,
+        Double DIz
 ) {
 }
 

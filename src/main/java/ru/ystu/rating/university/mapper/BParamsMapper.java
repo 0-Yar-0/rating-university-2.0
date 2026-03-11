@@ -75,6 +75,33 @@ public final class BParamsMapper {
         putIfNotNull(m, "PN2022", dto.PN2022());
         putIfNotNull(m, "PN2023", dto.PN2023());
         putIfNotNull(m, "PN2024", dto.PN2024());
+        putIfNotNull(m, "NBo", dto.NBo());
+        putIfNotNull(m, "NBv", dto.NBv());
+        putIfNotNull(m, "NBz", dto.NBz());
+        putIfNotNull(m, "NMo", dto.NMo());
+        putIfNotNull(m, "NMv", dto.NMv());
+        putIfNotNull(m, "NMz", dto.NMz());
+        putIfNotNull(m, "ACo", dto.ACo());
+        putIfNotNull(m, "ACv", dto.ACv());
+        putIfNotNull(m, "ACz", dto.ACz());
+        putIfNotNull(m, "KPo", dto.KPo());
+        putIfNotNull(m, "KPv", dto.KPv());
+        putIfNotNull(m, "KPz", dto.KPz());
+        putIfNotNull(m, "PPPo", dto.PPPo());
+        putIfNotNull(m, "PPPv", dto.PPPv());
+        putIfNotNull(m, "PPPz", dto.PPPz());
+        putIfNotNull(m, "NPo", dto.NPo());
+        putIfNotNull(m, "NPv", dto.NPv());
+        putIfNotNull(m, "NPz", dto.NPz());
+        putIfNotNull(m, "NAo", dto.NAo());
+        putIfNotNull(m, "NAv", dto.NAv());
+        putIfNotNull(m, "NAz", dto.NAz());
+        putIfNotNull(m, "PNo", dto.PNo());
+        putIfNotNull(m, "PNv", dto.PNv());
+        putIfNotNull(m, "PNz", dto.PNz());
+        putIfNotNull(m, "DIo", dto.DIo());
+        putIfNotNull(m, "DIv", dto.DIv());
+        putIfNotNull(m, "DIz", dto.DIz());
         return m;
     }
 
@@ -138,7 +165,34 @@ public final class BParamsMapper {
                 getDouble(json, "OD2024"),
                 getDouble(json, "PN2022"),
                 getDouble(json, "PN2023"),
-                getDouble(json, "PN2024")
+                getDouble(json, "PN2024"),
+                getDouble(json, "NBo"),
+                getDouble(json, "NBv"),
+                getDouble(json, "NBz"),
+                getDouble(json, "NMo"),
+                getDouble(json, "NMv"),
+                getDouble(json, "NMz"),
+                getDouble(json, "ACo"),
+                getDouble(json, "ACv"),
+                getDouble(json, "ACz"),
+                getDouble(json, "KPo"),
+                getDouble(json, "KPv"),
+                getDouble(json, "KPz"),
+                getDouble(json, "PPPo"),
+                getDouble(json, "PPPv"),
+                getDouble(json, "PPPz"),
+                getDouble(json, "NPo"),
+                getDouble(json, "NPv"),
+                getDouble(json, "NPz"),
+                getDouble(json, "NAo"),
+                getDouble(json, "NAv"),
+                getDouble(json, "NAz"),
+                getDouble(json, "PNo"),
+                getDouble(json, "PNv"),
+                getDouble(json, "PNz"),
+                getDouble(json, "DIo"),
+                getDouble(json, "DIv"),
+                getDouble(json, "DIz")
         );
     }
 
