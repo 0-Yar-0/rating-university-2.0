@@ -179,34 +179,53 @@ public class BService {
 
             DocumentCalcDto docCalc = documentService.computeAll(new DocumentParamsDto(paramMap));
 
+            double b11Final = metricOrDefault(rawParams, "B11", calcDto.b11());
+            double b12Final = metricOrDefault(rawParams, "B12", calcDto.b12());
+            double b13Final = metricOrDefault(rawParams, "B13", calcDto.b13());
+            double b21Final = metricOrDefault(rawParams, "B21", calcDto.b21());
+            double b22Final = metricOrDefault(rawParams, "B22", docCalc.get("B22"));
+            double b23Final = metricOrDefault(rawParams, "B23", docCalc.get("B23"));
+            double b24Final = metricOrDefault(rawParams, "B24", docCalc.get("B24"));
+            double b25Final = metricOrDefault(rawParams, "B25", docCalc.get("B25"));
+            double b26Final = metricOrDefault(rawParams, "B26", docCalc.get("B26"));
+            double b31Final = metricOrDefault(rawParams, "B31", docCalc.get("B31"));
+            double b32Final = metricOrDefault(rawParams, "B32", docCalc.get("B32"));
+            double b33Final = metricOrDefault(rawParams, "B33", docCalc.get("B33"));
+            double b34Final = metricOrDefault(rawParams, "B34", docCalc.get("B34"));
+            double b41Final = metricOrDefault(rawParams, "B41", docCalc.get("B41"));
+            double b42Final = metricOrDefault(rawParams, "B42", docCalc.get("B42"));
+            double b43Final = metricOrDefault(rawParams, "B43", docCalc.get("B43"));
+            double b44Final = metricOrDefault(rawParams, "B44", docCalc.get("B44"));
+            double sumBFinal = b11Final + b12Final + b13Final + b21Final
+                    + b22Final + b23Final + b24Final
+                    + b25Final + b26Final
+                    + b31Final + b32Final + b33Final
+                    + b34Final + b41Final + b42Final
+                    + b43Final + b44Final;
+
             // transfer additional metrics into calcDto by rebuilding it - easier
             calcDto = new BCalcDto(
                     calcDto.calcResultId(),
                     calcDto.year(),
                     calcDto.iteration(),
-                    calcDto.b11(),
-                    calcDto.b12(),
-                    calcDto.b13(),
-                    calcDto.b21(),
-                    docCalc.get("B22"),
-                    docCalc.get("B23"),
-                    docCalc.get("B24"),
-                    docCalc.get("B25"),
-                    docCalc.get("B26"),
-                    docCalc.get("B31"),
-                    docCalc.get("B32"),
-                    docCalc.get("B33"),
-                    docCalc.get("B34"),
-                    docCalc.get("B41"),
-                    docCalc.get("B42"),
-                    docCalc.get("B43"),
-                    docCalc.get("B44"),
-                    calcDto.sumB() +
-                            docCalc.get("B22") + docCalc.get("B23") + docCalc.get("B24")
-                                    + docCalc.get("B25") + docCalc.get("B26")
-                                    + docCalc.get("B31") + docCalc.get("B32") + docCalc.get("B33")
-                                    + docCalc.get("B34") + docCalc.get("B41") + docCalc.get("B42")
-                                    + docCalc.get("B43") + docCalc.get("B44"),
+                    b11Final,
+                    b12Final,
+                    b13Final,
+                    b21Final,
+                    b22Final,
+                    b23Final,
+                    b24Final,
+                    b25Final,
+                    b26Final,
+                    b31Final,
+                    b32Final,
+                    b33Final,
+                    b34Final,
+                    b41Final,
+                    b42Final,
+                    b43Final,
+                    b44Final,
+                    sumBFinal,
                     calcDto.codeClassA(),
                     calcDto.codeClassB(),
                     calcDto.codeClassV(),
@@ -460,6 +479,17 @@ public class BService {
                 } catch (NumberFormatException ex) {
                         return null;
                 }
+        }
+
+        private static double metricOrDefault(Map<String, Object> rawParams, String key, double fallback) {
+                if (rawParams == null || rawParams.isEmpty()) {
+                        return fallback;
+                }
+                Double direct = toDoubleOrNull(rawParams.get(key));
+                if (direct == null) {
+                        direct = toDoubleOrNull(rawParams.get(key.toLowerCase()));
+                }
+                return direct == null ? fallback : direct;
         }
 
 }

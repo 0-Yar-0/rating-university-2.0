@@ -36,7 +36,15 @@ class BExtendedCalculatorTest {
                 0.0, 0.0, 1033.0, 0.0, 266.0,
                 0.0564, 0.0343, 147.0, 197.0,
                 1250.0, 1195.0, 200.0, 362.0,
-                4.3066
+                4.3066,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0
         );
 
         BCalcDto basic = bmath.computeBForYear(params, 1);
@@ -83,11 +91,17 @@ class BExtendedCalculatorTest {
                 doc.get("B22"), doc.get("B23"), doc.get("B24"),
                 doc.get("B25"), doc.get("B26"),
                 doc.get("B31"), doc.get("B32"), doc.get("B33"),
-                basic.sumB() + doc.get("B22") + doc.get("B23") + doc.get("B24")
+            doc.get("B34"),
+            doc.get("B41"), doc.get("B42"), doc.get("B43"), doc.get("B44"),
+            basic.sumB() + doc.get("B22") + doc.get("B23") + doc.get("B24")
                         + doc.get("B25") + doc.get("B26")
-                        + doc.get("B31") + doc.get("B32") + doc.get("B33"),
+                + doc.get("B31") + doc.get("B32") + doc.get("B33")
+                + doc.get("B34") + doc.get("B41") + doc.get("B42") + doc.get("B43") + doc.get("B44"),
                 basic.codeClassA(), basic.codeClassB(), basic.codeClassV(),
-                basic.codeB11(), basic.codeB12(), basic.codeB13(), basic.codeB21()
+            basic.codeB11(), basic.codeB12(), basic.codeB13(), basic.codeB21(),
+            basic.codeB22(), basic.codeB23(), basic.codeB24(), basic.codeB25(),
+            basic.codeB26(), basic.codeB31(), basic.codeB32(), basic.codeB33(),
+            basic.codeB34(), basic.codeB41(), basic.codeB42(), basic.codeB43(), basic.codeB44()
         );
 
         // just check a couple of numbers

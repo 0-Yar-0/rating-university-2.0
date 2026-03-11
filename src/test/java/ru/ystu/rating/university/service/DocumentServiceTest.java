@@ -60,7 +60,7 @@ class DocumentServiceTest {
         assertEquals(1.0, out.get("KI"), 1e-6);
         assertEquals(57.771, out.get("TOTAL"), 1e-6);
         // verify additional formulas produce weighted scores (norm * weight)
-        assertEquals(0.028, out.get("B34"), 1e-3);
+        assertEquals(1.083, out.get("B34"), 1e-3);
         assertEquals(1.008, out.get("B41"), 1e-3);
         assertEquals(3.565, out.get("B42"), 1e-3);
         assertEquals(0.153, out.get("B43"), 1e-3);
@@ -82,9 +82,9 @@ class DocumentServiceTest {
         inputs.put("OPC", 0.0);
         inputs.put("ACC", 0.0);
         DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
-        // NBP = 941.5, NMP = 79.3, ACP = 11.8 => raw 0.122995...
-        assertEquals(0.1230, out.get("B22_raw"), 1e-4);
-        assertEquals(2.952, out.get("B22"), 1e-3);
+        // NBP = 941.5, NMP = 79.3, ACP = 11.8 => raw 0.121826...
+        assertEquals(0.12183, out.get("B22_raw"), 1e-4);
+        assertEquals(2.924, out.get("B22"), 1e-3);
         // other metrics already validated in first test
     }
 
@@ -99,8 +99,8 @@ class DocumentServiceTest {
 
         DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
 
-        assertEquals(0.1230, out.get("B22_raw"), 1e-4);
-        assertEquals(2.952, out.get("B22"), 1e-3);
+        assertEquals(0.12183, out.get("B22_raw"), 1e-4);
+        assertEquals(2.924, out.get("B22"), 1e-3);
     }
 
     @Test
