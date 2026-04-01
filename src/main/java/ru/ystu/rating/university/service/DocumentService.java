@@ -473,7 +473,7 @@ public class DocumentService {
         out.put("A_TOTAL_WITH_KI", aTotalWithKi);
 
         // -----------------------
-        // группа M (M11..M23, M31..M33)
+        // группа M (M11..M27, M31..M33, M41..M44)
         // -----------------------
 
         // M11 = (ZMD / ZM) * 100
@@ -523,24 +523,189 @@ public class DocumentService {
         out.put("M23_raw", m23raw);
         out.put("M23", Normalizer.clamp01(m23raw, 0.0, 0.20) * 6.0);
 
+        // M24 = NAP / PN
+        // Allows either pre-aggregated raw value or explicit NAP/PN inputs.
+        double m24raw;
+        if (in.values().containsKey("M24_o")) {
+            m24raw = v.apply("M24_o");
+        } else {
+            double m24Nap = firstPresent(in, "NAP", "M24_NAP", "NAo");
+            double m24Pn = firstPresent(in, "PN", "M24_PN", "NMP");
+            m24raw = Normalizer.safeDiv(m24Nap, m24Pn);
+        }
+        out.put("M24_raw", m24raw);
+        out.put("M24", Normalizer.clamp01(m24raw, 0.0, 0.5) * 6.0);
+
         // M31_o может приходить уже агрегированным из внешнего расчёта.
         double m31raw = firstPresent(in, "M31_o", "M31_raw", "M31raw");
         out.put("M31_raw", m31raw);
         out.put("M31", Normalizer.clamp01(m31raw, 1.0, 5.0) * 20.0);
 
-        // M32 совпадает по формуле и нормированию с B32.
-        double m32raw = b32raw;
+        // M32 uses only M-row inputs and is independent from B block values.
+        double m32raw = Normalizer.safeDiv(
+            firstPresent(in, "M_N", "N_M", "N")
+                + firstPresent(in, "M_VO", "VO_M", "VO")
+                - firstPresent(in, "M_PO", "PO_M", "PO"),
+            firstPresent(in, "M_Npr", "Npr_M", "Npr")
+        ) * 100.0;
         out.put("M32_raw", m32raw);
         out.put("M32", Normalizer.clamp01(m32raw, 75.0, 90.0) * 5.0);
 
-        // M33 совпадает по формуле и нормированию с B34.
-        double m33raw = b34raw;
+        // M33 uses only M-row labor-market inputs and is independent from B block values.
+        double sumM33 = 0.0;
+        int kM33 = 0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2023 + i;
+            double nr = firstPresent(in, "M_NR" + year, "M33_NR" + year, "NR" + year);
+            sumM33 += nr;
+            if (nr != 0.0) {
+                kM33++;
+            }
+        }
+        double m33raw = kM33 > 0 ? (sumM33 / kM33) : 0.0;
         out.put("M33_raw", m33raw);
         out.put("M33", Normalizer.clamp01(m33raw, 0.3, 1.5) * 2.0);
 
+        // M25 = (BP + CP) / NMP
+        // BP = 1.0*BPo + 0.25*BPv + 0.1*BPz
+        // CP = 1.0*CPo + 0.25*CPv + 0.1*CPz
+        // NMP = 1.0*NMo + 0.25*NMv + 0.1*NMz
+        double m25raw;
+        if (in.values().containsKey("M25_o")) {
+            m25raw = v.apply("M25_o");
+        } else {
+            double bp = 1.0 * firstPresent(in, "M25_BPo", "BPo")
+                + 0.25 * firstPresent(in, "M25_BPv", "BPv")
+                + 0.1 * firstPresent(in, "M25_BPz", "BPz");
+            double cp = 1.0 * firstPresent(in, "M25_CPo", "CPo")
+                + 0.25 * firstPresent(in, "M25_CPv", "CPv")
+                + 0.1 * firstPresent(in, "M25_CPz", "CPz");
+            double mNmp = 1.0 * firstPresent(in, "M25_NMo", "NMo")
+                + 0.25 * firstPresent(in, "M25_NMv", "NMv")
+                + 0.1 * firstPresent(in, "M25_NMz", "NMz");
+            if ((bp + cp) > 0.0 && mNmp == 0.0) {
+                m25raw = 1.0;
+            } else {
+                m25raw = Normalizer.safeDiv(bp + cp, mNmp);
+            }
+        }
+        out.put("M25_raw", m25raw);
+        out.put("M25", Normalizer.clamp01(m25raw, 0.0, 15.0) * 1.0);
+
+        // M26 = average((CHPSi/CHPi) * 100), i=2022..2022+k-1
+        double sumM26 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double chps = firstPresent(in,
+                "M26_CHPSi" + year,
+                "M_CHPSi" + year,
+                "CHPSi" + year,
+                "ЧПСi" + year,
+                "CPSi" + year);
+            double chp = firstPresent(in,
+                "M26_CHPi" + year,
+                "M_CHPi" + year,
+                "CHPi" + year,
+                "ЧПi" + year,
+                "CPi" + year);
+            if (chp > 0) {
+                sumM26 += chps / chp;
+            }
+        }
+        double m26raw = (sumM26 * 100.0) / kYears;
+        out.put("M26_raw", m26raw);
+        out.put("M26", Normalizer.clamp01(m26raw, 0.0, 25.0) * 1.0);
+
+        // M27 = average((CHOSi/CHOi) * 100), i=2022..2022+k-1
+        double sumM27 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double chos = firstPresent(in,
+                "M27_CHOSi" + year,
+                "M_CHOSi" + year,
+                "CHOSi" + year,
+                "ЧОСi" + year,
+                "COSi" + year);
+            double cho = firstPresent(in,
+                "M27_CHOi" + year,
+                "M_CHOi" + year,
+                "CHOi" + year,
+                "ЧОi" + year,
+                "COi" + year);
+            if (cho > 0) {
+                sumM27 += chos / cho;
+            }
+        }
+        double m27raw = (sumM27 * 100.0) / kYears;
+        out.put("M27_raw", m27raw);
+        out.put("M27", Normalizer.clamp01(m27raw, 0.0, 30.0) * 1.0);
+
+        // M41 — publications per 100 NPR
+        double sumM41 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double wl = firstPresent(in, "M_WL" + year, "M41_WL" + year, "WL" + year);
+            double npr = firstPresent(in, "M_NPR" + year, "M41_NPR" + year, "NPR" + year);
+            if (npr > 0) {
+                sumM41 += wl / npr;
+            }
+        }
+        double m41raw = (sumM41 * 100.0) / kYears;
+        out.put("M41_raw", m41raw);
+        out.put("M41", Normalizer.clamp01(m41raw, 5.0, 100.0) * 8.0);
+
+        // M42 — R&D income per NPR
+        double sumM42 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double dn = firstPresent(in, "M_DN" + year, "M42_DN" + year, "DN" + year);
+            double npr = firstPresent(in, "M_NPR" + year, "M42_NPR" + year, "NPR" + year);
+            if (npr > 0) {
+                sumM42 += dn / npr;
+            }
+        }
+        double m42raw = sumM42 / kYears;
+        out.put("M42_raw", m42raw);
+        out.put("M42", Normalizer.clamp01(m42raw, 100.0, 1000.0) * 8.0);
+
+        // M43 — foreign students share
+        double mIo = firstPresent(in, "M_Io", "M43_Io", "Io");
+        double mIv = firstPresent(in, "M_Iv", "M43_Iv", "Iv");
+        double mIz = firstPresent(in, "M_Iz", "M43_Iz", "Iz");
+        double mNo = firstPresent(in, "M_No", "M43_No", "No");
+        double mNv = firstPresent(in, "M_Nv", "M43_Nv", "Nv");
+        double mNz = firstPresent(in, "M_Nz", "M43_Nz", "Nz");
+        double m43den = mNo + 0.25 * mNv + 0.1 * mNz;
+        double m43raw = m43den == 0 ? 0.0 : (mIo + 0.25 * mIv + 0.1 * mIz) / m43den * 100.0;
+        out.put("M43_raw", m43raw);
+        out.put("M43", Normalizer.clamp01(m43raw, 1.0, 15.0) * 7.0);
+
+        // M44 — total income per weighted student body
+        double sumM44 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double od = firstPresent(in, "M_OD" + year, "M44_OD" + year, "OD" + year);
+            double noYear = firstPresent(in, "M_NO" + year, "M44_NO" + year, "NO" + year, "No" + year);
+            double nvYear = firstPresent(in, "M_NV" + year, "M44_NV" + year, "NV" + year, "Nv" + year);
+            double nzYear = firstPresent(in, "M_NZ" + year, "M44_NZ" + year, "NZ" + year, "Nz" + year);
+            double noaYear = firstPresent(in, "M_NOA" + year, "M44_NOA" + year, "NOA" + year, "Noa" + year);
+            double pnYear = 1.0 * noYear + 0.25 * nvYear + 0.1 * nzYear + noaYear;
+            if (pnYear <= 0) {
+                pnYear = firstPresent(in, "M_PN" + year, "PN" + year);
+            }
+            if (pnYear > 0) {
+                sumM44 += od / pnYear;
+            }
+        }
+        double m44raw = sumM44 / kYears;
+        out.put("M44_raw", m44raw);
+        out.put("M44", Normalizer.clamp01(m44raw, 50.0, 500.0) * 7.0);
+
         double mTotal = out.get("M11") + out.get("M12") + out.get("M13") + out.get("M14")
-            + out.get("M21") + out.get("M22") + out.get("M23")
-            + out.get("M31") + out.get("M32") + out.get("M33");
+            + out.get("M21") + out.get("M22") + out.get("M23") + out.get("M24")
+            + out.get("M25") + out.get("M26") + out.get("M27")
+            + out.get("M31") + out.get("M32") + out.get("M33")
+            + out.get("M41") + out.get("M42") + out.get("M43") + out.get("M44");
         double mTotalWithKi = mTotal * kiM;
         out.put("M_TOTAL", mTotal);
         out.put("M_TOTAL_WITH_KI", mTotalWithKi);

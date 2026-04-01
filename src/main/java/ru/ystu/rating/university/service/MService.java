@@ -88,9 +88,17 @@ public class MService {
             double m21Final = metricOrDefault(raw, "M21", dcalc.get("M21"));
             double m22Final = metricOrDefault(raw, "M22", dcalc.get("M22"));
             double m23Final = metricOrDefault(raw, "M23", dcalc.get("M23"));
+            double m24Final = metricOrDefault(raw, "M24", dcalc.get("M24"));
+            double m25Final = metricOrDefault(raw, "M25", dcalc.get("M25"));
+            double m26Final = metricOrDefault(raw, "M26", dcalc.get("M26"));
+            double m27Final = metricOrDefault(raw, "M27", dcalc.get("M27"));
             double m31Final = metricOrDefault(raw, "M31", dcalc.get("M31"));
             double m32Final = metricOrDefault(raw, "M32", dcalc.get("M32"));
             double m33Final = metricOrDefault(raw, "M33", dcalc.get("M33"));
+            double m41Final = metricOrDefault(raw, "M41", dcalc.get("M41"));
+            double m42Final = metricOrDefault(raw, "M42", dcalc.get("M42"));
+            double m43Final = metricOrDefault(raw, "M43", dcalc.get("M43"));
+            double m44Final = metricOrDefault(raw, "M44", dcalc.get("M44"));
 
             Double kiOverride = firstNonNull(
                     toDoubleOrNull(raw.get("M_KI")),
@@ -99,8 +107,10 @@ public class MService {
             );
             double mKi = kiOverride != null ? kiOverride : dcalc.get("KI_M");
             double mTotal = m11Final + m12Final + m13Final + m14Final
-                    + m21Final + m22Final + m23Final
-                    + m31Final + m32Final + m33Final;
+                    + m21Final + m22Final + m23Final + m24Final
+                    + m25Final + m26Final + m27Final
+                    + m31Final + m32Final + m33Final
+                    + m41Final + m42Final + m43Final + m44Final;
             double mTotalWithKi = mTotal * mKi;
 
             Map<String, Object> calc = new LinkedHashMap<>();
@@ -113,9 +123,17 @@ public class MService {
             calc.put("M21", m21Final);
             calc.put("M22", m22Final);
             calc.put("M23", m23Final);
+            calc.put("M24", m24Final);
+            calc.put("M25", m25Final);
+            calc.put("M26", m26Final);
+            calc.put("M27", m27Final);
             calc.put("M31", m31Final);
             calc.put("M32", m32Final);
             calc.put("M33", m33Final);
+            calc.put("M41", m41Final);
+            calc.put("M42", m42Final);
+            calc.put("M43", m43Final);
+            calc.put("M44", m44Final);
             calc.put("KI", mKi);
             calc.put("TOTAL", mTotalWithKi);
             calc.put("M_TOTAL", mTotal);
