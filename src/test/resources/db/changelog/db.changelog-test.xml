@@ -8,6 +8,7 @@
 
     <include file="0000-init-tables-h2.sql" relativeToChangelogFile="true"/>
     <include file="classpath:db/changelog/0002-insert-tables.sql"/>
+    <include file="classpath:db/changelog/0005-add-m-class.sql"/>
     <include file="0003-add-more-metric-columns-h2.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

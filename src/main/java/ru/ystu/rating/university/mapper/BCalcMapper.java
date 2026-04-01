@@ -63,7 +63,7 @@ public final class BCalcMapper {
                                         CalcResultName names) {
         String codeClassA = names != null ? names.getCodeClassA() : "А";
         String codeClassB = names != null ? names.getCodeClassB() : "Б";
-        String codeClassV = names != null ? names.getCodeClassV() : "В";
+        String codeClassM = names != null ? names.getCodeClassM() : "М";
 
         String codeB11 = names != null ? names.getCodeB11() : "B11";
         String codeB12 = names != null ? names.getCodeB12() : "B12";
@@ -107,7 +107,7 @@ public final class BCalcMapper {
                 getDouble(json, "total"),
                 codeClassA,
                 codeClassB,
-                codeClassV,
+                codeClassM,
                 codeB11,
                 codeB12,
                 codeB13,

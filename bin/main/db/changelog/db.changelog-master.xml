@@ -12,5 +12,6 @@
     <!-- additional change sets for new B metric name columns -->
     <include file="0003-add-more-metric-columns.sql" relativeToChangelogFile="true"/>
     <include file="0004-add-more-metric-columns.sql" relativeToChangelogFile="true"/>
+    <include file="0005-add-m-class.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

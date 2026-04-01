@@ -323,6 +323,53 @@ public class DocumentService {
         out.put("B44_raw", b44raw);
         out.put("B44", Normalizer.clamp01(b44raw, 50.0, 500.0) * 5.0);
 
+        // -----------------------
+        // 3. категория A (A31..A33)
+        // -----------------------
+
+        // A31_raw = (Σ (WL[Y] / NPR[Y]), Y=2022..2022+k-1) * 100 / k
+        double a31raw = b41raw;
+        out.put("A31_raw", a31raw);
+        out.put("A31", Normalizer.clamp01(a31raw, 5.0, 100.0) * 8.0);
+
+        // A32_raw = (Σ (DN[Y] / NPR[Y]), Y=2022..2022+k-1) / k
+        double a32raw = b42raw;
+        out.put("A32_raw", a32raw);
+        out.put("A32", Normalizer.clamp01(a32raw, 100.0, 1000.0) * 8.0);
+
+        // A33_raw = (Σ (RDN[Y] / NPR[Y]), Y=2022..2022+k-1) / k
+        double sumA33 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double rdn = firstPresent(in, "RDN" + year, "РДН" + year);
+            double npr = firstPresent(in, "NPR" + year);
+            if (npr > 0) {
+                sumA33 += rdn / npr;
+            }
+        }
+        double a33raw = sumA33 / kYears;
+        out.put("A33_raw", a33raw);
+        out.put("A33", Normalizer.clamp01(a33raw, 50.0, 500.0) * 4.0);
+
+        // -----------------------
+        // 3. категория M (M31..M33)
+        // -----------------------
+
+        // M31_o может приходить уже агрегированным из внешнего расчёта.
+        double m31raw = firstPresent(in, "M31_o", "M31_raw", "M31raw");
+        out.put("M31_raw", m31raw);
+        out.put("M31", Normalizer.clamp01(m31raw, 1.0, 5.0) * 20.0);
+
+        // M32 совпадает по формуле и нормированию с B32.
+        double m32raw = b32raw;
+        out.put("M32_raw", m32raw);
+        out.put("M32", Normalizer.clamp01(m32raw, 75.0, 90.0) * 5.0);
+
+        // M33 совпадает по формуле и нормированию с B34.
+        double m33raw = b34raw;
+        out.put("M33_raw", m33raw);
+        out.put("M33", Normalizer.clamp01(m33raw, 0.3, 1.5) * 2.0);
+
         return new DocumentCalcDto(out);
     }
 

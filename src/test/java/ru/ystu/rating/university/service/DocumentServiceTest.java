@@ -65,6 +65,29 @@ class DocumentServiceTest {
         assertEquals(3.565, out.get("B42"), 1e-3);
         assertEquals(0.153, out.get("B43"), 1e-3);
         assertEquals(2.576, out.get("B44"), 1e-3);
+        // A-category (3rd group) mirrors raw components but has its own weights
+        assertEquals(24.149, out.get("A31_raw"), 1e-3);
+        assertEquals(1.613, out.get("A31"), 1e-3);
+        assertEquals(741.646, out.get("A32_raw"), 1e-3);
+        assertEquals(5.703, out.get("A32"), 1e-3);
+        // M33 uses the same raw basis as B34 in this implementation
+        assertEquals(out.get("B34"), out.get("M33"), 1e-9);
+    }
+
+    @Test
+    void testA33Computation() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("RDN2022", 24155.0);
+        inputs.put("RDN2023", 83435.9);
+        inputs.put("RDN2024", 460306.2);
+        inputs.put("NPR2022", 270.1);
+        inputs.put("NPR2023", 278.9);
+        inputs.put("NPR2024", 278.5);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        assertEquals(680.5, out.get("A33_raw"), 1e-1);
+        assertEquals(4.0, out.get("A33"), 1e-6);
     }
 
     @Test
@@ -177,5 +200,8 @@ class DocumentServiceTest {
         assertEquals(10.546, out.get("B31"), 1e-3);
         assertEquals(91.05, out.get("B32_raw"), 1e-2);
         assertEquals(5.000, out.get("B32"), 1e-3);
+        // M32 is aligned with B32 normalization and weight
+        assertEquals(out.get("B32_raw"), out.get("M32_raw"), 1e-9);
+        assertEquals(out.get("B32"), out.get("M32"), 1e-9);
     }
 }

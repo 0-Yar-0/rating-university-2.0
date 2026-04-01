@@ -16,6 +16,7 @@ import ru.ystu.rating.university.security.CustomUserDetails;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,11 +81,13 @@ public class RatingControllerIntegrationTest {
             principal.getAuthorities()
         );
 
+        String jsonBody = Objects.requireNonNull(mapper.writeValueAsString(req));
+
         mvc.perform(post("/api/rating/calc-multi")
-            .with(authentication(auth))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(req))
-                .accept(MediaType.APPLICATION_JSON)
+            .with(Objects.requireNonNull(authentication(auth)))
+                .contentType(Objects.requireNonNull(MediaType.APPLICATION_JSON))
+                .content(jsonBody)
+                .accept(Objects.requireNonNull(MediaType.APPLICATION_JSON))
         )
                 .andExpect(status().isOk());
     }

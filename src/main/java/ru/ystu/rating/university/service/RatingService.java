@@ -2,18 +2,18 @@ package ru.ystu.rating.university.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.ystu.rating.university.dto.*;
 import ru.ystu.rating.university.model.AppUser;
 import ru.ystu.rating.university.model.UserIterState;
 import ru.ystu.rating.university.repository.AppUserRepository;
 import ru.ystu.rating.university.repository.DataRepository;
 import ru.ystu.rating.university.repository.UserIterStateRepository;
+import ru.ystu.rating.university.service.orchestration.ClassModule;
+import ru.ystu.rating.university.service.orchestration.ClassModuleFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class RatingService {
@@ -21,25 +21,16 @@ public class RatingService {
     private final AppUserRepository userRepo;
     private final DataRepository dataRepo;
     private final UserIterStateRepository userIterStateRepo;
-    private final BService bService;
-    private final AService aService;
-    // в будущем: VService
-
-    // used to convert loosely-typed JSON payloads into strong DTOs
-    private final ObjectMapper mapper;
+    private final ClassModuleFactory classModuleFactory;
 
     public RatingService(AppUserRepository userRepo,
                          DataRepository dataRepo,
                          UserIterStateRepository userIterStateRepo,
-                         BService bService,
-                         AService aService,
-                         ObjectMapper mapper) {
+                         ClassModuleFactory classModuleFactory) {
         this.userRepo = userRepo;
         this.dataRepo = dataRepo;
         this.userIterStateRepo = userIterStateRepo;
-        this.bService = bService;
-        this.aService = aService;
-        this.mapper = mapper;
+        this.classModuleFactory = classModuleFactory;
     }
 
     // ========================================================================
@@ -50,15 +41,15 @@ public class RatingService {
      * Оркестратор:
      * - считает next iteration для пользователя (глобально по всем классам);
      * - распределяет параметры по классам;
-     * - делегирует расчёт для B в BService;
-     * - для A и V заглушки.
+    * - делегирует расчет соответствующему обработчику класса.
      */
     @Transactional
     public MultiClassCalcResponseDto saveParamsAndComputeAll(
             Long userId,
             MultiClassParamsRequestDto request
     ) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+        Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+        AppUser user = userRepo.findById(safeUserId).orElseThrow();
 
         int lastIter = dataRepo.findMaxIterForUser(user);
         int nextIter = lastIter + 1;
@@ -67,62 +58,11 @@ public class RatingService {
 
         if (request.classes() != null) {
             for (ClassParamsBlockDto block : request.classes()) {
-                if (block == null || block.classType() == null) continue;
+                if (block == null) continue;
 
-                String classType = block.classType().toUpperCase();
+                ClassModule module = classModuleFactory.getOrNoOp(block.classType());
 
-                switch (classType) {
-                    case "B" -> {
-                        List<Map<String, Object>> rawBParams;
-                        try {
-                            rawBParams = mapper.convertValue(
-                                    block.data(),
-                                    new TypeReference<List<Map<String, Object>>>() {}
-                            );
-                        } catch (Exception ex) {
-                            throw new IllegalArgumentException("Invalid raw parameters for class B", ex);
-                        }
-
-                        // convert the generic `data` list into proper BParamsDto objects
-                        List<BParamsDto> bParams;
-                        try {
-                            bParams = mapper.convertValue(
-                                    block.data(),
-                                    new TypeReference<List<BParamsDto>>() {}
-                            );
-                        } catch (Exception ex) {
-                            throw new IllegalArgumentException("Invalid parameters for class B", ex);
-                        }
-                        BMetricNamesDto names = block.names();
-
-                        List<BCalcDto> bResults = bService.saveParamsAndComputeForB(
-                                user,
-                                nextIter,
-                                bParams,
-                            rawBParams,
-                                names
-                        );
-                        resultBlocks.add(new ClassCalcBlockDto("B", bResults));
-                    }
-                    case "A" -> {
-                        @SuppressWarnings("unchecked")
-                        List<AParamsDto> aParams = (List<AParamsDto>) (List<?>) block.data();
-                        List<ACalcDto> aResults = aService.saveParamsAndComputeForA(
-                                user,
-                                nextIter,
-                                aParams,
-                                null
-                        );
-                        resultBlocks.add(new ClassCalcBlockDto("A", aResults));
-                    }
-                    case "V" -> {
-                        // Заглушка VService
-                        resultBlocks.add(new ClassCalcBlockDto("V", List.of()));
-                    }
-                    default -> {
-                        // неизвестный класс — игнорируем
-                    }
-                }
+                resultBlocks.add(module.calculate(user, nextIter, block));
             }
         }
 
@@ -144,49 +84,42 @@ public class RatingService {
     // ========================================================================
 
     /**
-     * Общая история по всем классам (A/B/V...) для пользователя.
+    * Общая история по всем классам (A/B/M...) для пользователя.
      * Сейчас реально заполнен только B, остальные — заглушки.
      */
     @Transactional(readOnly = true)
     public MultiClassHistoryResponseDto getHistoryAllClasses(Long userId) {
-        List<HistoryResponseDto> histories = new ArrayList<>();
-
-        // histories.add(aService.getHistoryForA(userId));
-        histories.add(bService.getHistoryForB(userId));
-        // histories.add(vService.getHistoryForV(userId));
+        Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+        List<HistoryResponseDto> histories = classModuleFactory.getSortedModules().stream()
+            .map(module -> module.getHistory(safeUserId))
+                .toList();
 
         return new MultiClassHistoryResponseDto(histories);
     }
 
     // ========================================================================
-    // 3. ЭКСПОРТ ПОСЛЕДНИХ ПАРАМЕТРОВ (ПОКА ТОЛЬКО B)
+    // 3. ЭКСПОРТ ПОСЛЕДНИХ ПАРАМЕТРОВ
     // ========================================================================
 
     /**
      * Экспорт "последнего состояния параметров" по всем классам.
-     * Сейчас реально реализован только класс B:
-     * - берём из BService последнюю итерацию для B;
-     * - заворачиваем в MultiClassParamsRequestDto, чтобы фронт мог
-     * сохранить это в JSON и потом импортировать (НА ФРОНТЕ).
+        * Данные возвращаются блоками по классам A/B/M.
      */
     @Transactional(readOnly = true)
     public MultiClassParamsRequestDto exportParams(Long userId) {
-        List<ClassParamsBlockDto> blocks = new ArrayList<>();
-
-        // Класс B
-        ClassParamsBlockDto bBlock = bService.getLastParamsForB(userId);
-        if (bBlock.data() != null && !bBlock.data().isEmpty()) {
-            blocks.add(bBlock);
-        }
-
-        // В будущем сюда добавятся блоки A и V
+        Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+        List<ClassParamsBlockDto> blocks = classModuleFactory.getSortedModules().stream()
+            .map(module -> module.getLastParams(safeUserId))
+                .filter(block -> block.data() != null && !block.data().isEmpty())
+                .toList();
 
         return new MultiClassParamsRequestDto(blocks);
     }
 
     @Transactional
     public void clearCurrentForUser(Long userId) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+        Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+        AppUser user = userRepo.findById(safeUserId).orElseThrow();
 
         userIterStateRepo.findByAppUser(user).ifPresent(state -> {
             state.setCurrentIter(null);
@@ -196,7 +129,8 @@ public class RatingService {
 
     @Transactional
     public void clearHistory(Long userId) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+        Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+        AppUser user = userRepo.findById(safeUserId).orElseThrow();
         dataRepo.deleteAllByAppUser(user);
     }
 }

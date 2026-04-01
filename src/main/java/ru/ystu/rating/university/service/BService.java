@@ -257,7 +257,7 @@ public class BService {
                     sumBFinal,
                     calcDto.codeClassA(),
                     calcDto.codeClassB(),
-                    calcDto.codeClassV(),
+                    calcDto.codeClassM(),
                     calcDto.codeB11(),
                     calcDto.codeB12(),
                     calcDto.codeB13(),
@@ -287,7 +287,7 @@ public class BService {
                 names.setCalcResult(cr);
                 names.setCodeClassA(namesDto.codeClassA());
                 names.setCodeClassB(namesDto.codeClassB());
-                names.setCodeClassV(namesDto.codeClassV());
+                names.setCodeClassM(namesDto.codeClassM());
                 names.setCodeB11(namesDto.codeB11());
                 names.setCodeB12(namesDto.codeB12());
                 names.setCodeB13(namesDto.codeB13());
@@ -320,7 +320,8 @@ public class BService {
 
     @Transactional(readOnly = true)
     public ClassParamsBlockDto getLastParamsForB(Long userId) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+                Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                AppUser user = userRepo.findById(safeUserId).orElseThrow();
         RatingClass bClass = classRepo.findByCode("B")
                 .orElseThrow(() -> new IllegalStateException("Класс B не найден"));
 
@@ -348,7 +349,8 @@ public class BService {
 
     @Transactional(readOnly = true)
     public ClassParamsBlockDto getParamsForBIter(Long userId, int iter) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+                Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                AppUser user = userRepo.findById(safeUserId).orElseThrow();
         RatingClass bClass = classRepo.findByCode("B")
                 .orElseThrow(() -> new IllegalStateException("Класс B не найден"));
 
@@ -378,7 +380,8 @@ public class BService {
 
     @Transactional(readOnly = true)
     public ClassCalcBlockDto getLastCalcForB(Long userId) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+                Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                AppUser user = userRepo.findById(safeUserId).orElseThrow();
         RatingClass bClass = classRepo.findByCode("B")
                 .orElseThrow(() -> new IllegalStateException("Класс B не найден"));
 
@@ -413,7 +416,8 @@ public class BService {
 
     @Transactional(readOnly = true)
     public HistoryResponseDto getHistoryForB(Long userId) {
-        AppUser user = userRepo.findById(userId).orElseThrow();
+                Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                AppUser user = userRepo.findById(safeUserId).orElseThrow();
         RatingClass bClass = classRepo.findByCode("B")
                 .orElseThrow(() -> new IllegalStateException("Класс B не найден"));
 
@@ -459,8 +463,9 @@ public class BService {
 
     @Transactional
     public void updateMetricNames(MetricNamesDto dto) {
-        CalcResult cr = calcRepo.findById(dto.calcResultId())
-                .orElseThrow(() -> new IllegalArgumentException("CalcResult not found: " + dto.calcResultId()));
+        Long calcResultId = Objects.requireNonNull(dto.calcResultId(), "calcResultId must not be null");
+        CalcResult cr = calcRepo.findById(calcResultId)
+                .orElseThrow(() -> new IllegalArgumentException("CalcResult not found: " + calcResultId));
 
         CalcResultName names = namesRepo.findByCalcResultId(cr.getId())
                 .orElseGet(() -> {
@@ -471,7 +476,7 @@ public class BService {
 
         names.setCodeClassA(dto.codeClassA());
         names.setCodeClassB(dto.codeClassB());
-        names.setCodeClassV(dto.codeClassV());
+        names.setCodeClassM(dto.codeClassM());
         names.setCodeB11(dto.codeB11());
         names.setCodeB12(dto.codeB12());
         names.setCodeB13(dto.codeB13());

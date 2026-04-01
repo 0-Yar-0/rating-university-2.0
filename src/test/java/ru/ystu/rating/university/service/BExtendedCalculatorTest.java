@@ -108,7 +108,7 @@ class BExtendedCalculatorTest {
                         + doc.get("B25") + doc.get("B26")
                 + doc.get("B31") + doc.get("B32") + doc.get("B33")
                 + doc.get("B34") + doc.get("B41") + doc.get("B42") + doc.get("B43") + doc.get("B44"),
-                basic.codeClassA(), basic.codeClassB(), basic.codeClassV(),
+                basic.codeClassA(), basic.codeClassB(), basic.codeClassM(),
             basic.codeB11(), basic.codeB12(), basic.codeB13(), basic.codeB21(),
             basic.codeB22(), basic.codeB23(), basic.codeB24(), basic.codeB25(),
             basic.codeB26(), basic.codeB31(), basic.codeB32(), basic.codeB33(),

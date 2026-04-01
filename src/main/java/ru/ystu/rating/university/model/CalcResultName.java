@@ -20,7 +20,7 @@ public class CalcResultName {
     private String codeClassB = "Б";
 
     @Column(name = "code_class_v", nullable = false)
-    private String codeClassV = "В";
+    private String codeClassV = "М";
 
     @Column(name = "code_b11", nullable = false, length = 50)
     private String codeB11 = "B11";
@@ -114,6 +114,14 @@ public class CalcResultName {
 
     public void setCodeClassV(String codeClassV) {
         this.codeClassV = codeClassV;
+    }
+
+    public String getCodeClassM() {
+        return codeClassV;
+    }
+
+    public void setCodeClassM(String codeClassM) {
+        this.codeClassV = codeClassM;
     }
 
     public String getCodeB11() {

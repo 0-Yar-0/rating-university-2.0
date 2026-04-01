@@ -14,7 +14,7 @@ import ru.ystu.rating.university.service.RatingService;
 @RequestMapping("/api/rating")
 @Tag(
         name = "Rating",
-        description = "Параметры и расчеты по всем классам (A/B/V): сохранение параметров и расчёты, история"
+    description = "Параметры и расчеты по всем классам (A/B/M): сохранение параметров и расчёты, история"
 )
 public class RatingController {
 
@@ -26,16 +26,15 @@ public class RatingController {
 
     /**
      * Создать новую итерацию для пользователя, сохранить параметры по
-     * всем переданным классам (A/B/V) и выполнить расчёт.
-     * <p>
-     * Сейчас реально считается только класс B — A и V заглушки.
+    * всем переданным классам (A/B/M) и выполнить расчёт.
+         * 
      * <p>
      * userId - SecurityContext
      */
     @PostMapping("/calc-multi")
     @Operation(
-            summary = "Сохранить параметры по классам A/B/V и пересчитать (новая итерация)",
-            description = "Сейчас расчёт выполняется только для класса B; A и V — заглушки"
+            summary = "Сохранить параметры по классам A/B/M и пересчитать (новая итерация)",
+            description = "Расчет выполняется для A, B и M"
     )
     public MultiClassCalcResponseDto saveAndComputeAll(
             @AuthenticationPrincipal CustomUserDetails principal,
@@ -46,11 +45,11 @@ public class RatingController {
     }
 
     /**
-     * Получение истории по всем итерациям и классам (A/B/V) для
+    * Получение истории по всем итерациям и классам (A/B/M) для
      * конкретного пользователя
      */
     @GetMapping("/history")
-    @Operation(summary = "История по всем классам A/B/V для пользователя")
+    @Operation(summary = "История по всем классам A/B/M для пользователя")
     public MultiClassHistoryResponseDto getFullHistory(
             @AuthenticationPrincipal CustomUserDetails principal
     ) {

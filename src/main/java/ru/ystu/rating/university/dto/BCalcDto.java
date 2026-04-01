@@ -44,5 +44,8 @@ public record BCalcDto(
         String codeB43,
         String codeB44
 ) {
+        public String codeClassM() {
+                return codeClassV;
+        }
 }
 

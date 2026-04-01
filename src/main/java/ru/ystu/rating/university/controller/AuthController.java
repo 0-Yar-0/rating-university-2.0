@@ -20,6 +20,8 @@ import ru.ystu.rating.university.repository.AppUserRepository;
 import ru.ystu.rating.university.security.CustomUserDetails;
 import ru.ystu.rating.university.service.AuthService;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Auth", description = "Регистрация и авторизация через сессии")
@@ -99,9 +101,11 @@ public class AuthController {
             throw new RuntimeException("Not authenticated");
         }
 
-        AppUser user = userRepo.findById(principal.getId())
+        Long principalId = Objects.requireNonNull(principal.getId(), "principal id must not be null");
+
+        AppUser user = userRepo.findById(principalId)
                 .orElseThrow(() -> new IllegalStateException(
-                        "User not found by id: " + principal.getId()
+                "User not found by id: " + principalId
                 ));
 
         return authService.toAuthResponse(user);
