@@ -1,5 +1,7 @@
 package ru.ystu.rating.university.service;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ystu.rating.university.dto.*;
@@ -12,7 +14,10 @@ import ru.ystu.rating.university.service.orchestration.ClassModule;
 import ru.ystu.rating.university.service.orchestration.ClassModuleFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -22,15 +27,30 @@ public class RatingService {
     private final DataRepository dataRepo;
     private final UserIterStateRepository userIterStateRepo;
     private final ClassModuleFactory classModuleFactory;
+        private final ObjectMapper objectMapper;
+
+        private static final String[] A_SHARED_FROM_B = {
+            "PNo", "PNv", "PNz", "DIo", "DIv", "DIz",
+            "WL2022", "WL2023", "WL2024",
+            "NPR2022", "NPR2023", "NPR2024",
+            "DN2022", "DN2023", "DN2024",
+            "OD2022", "OD2023", "OD2024"
+        };
+
+        private static final String[] M_SHARED_FROM_B = {
+            "N", "Npr", "VO", "PO", "NR2023", "NR2024", "NR2025"
+        };
 
     public RatingService(AppUserRepository userRepo,
                          DataRepository dataRepo,
                          UserIterStateRepository userIterStateRepo,
-                         ClassModuleFactory classModuleFactory) {
+                 ClassModuleFactory classModuleFactory,
+                 ObjectMapper objectMapper) {
         this.userRepo = userRepo;
         this.dataRepo = dataRepo;
         this.userIterStateRepo = userIterStateRepo;
         this.classModuleFactory = classModuleFactory;
+        this.objectMapper = objectMapper;
     }
 
     // ========================================================================
@@ -56,8 +76,9 @@ public class RatingService {
 
         List<ClassCalcBlockDto> resultBlocks = new ArrayList<>();
 
-        if (request.classes() != null) {
-            for (ClassParamsBlockDto block : request.classes()) {
+        List<ClassParamsBlockDto> normalizedBlocks = enrichWithSharedBMetrics(request.classes());
+        if (normalizedBlocks != null) {
+            for (ClassParamsBlockDto block : normalizedBlocks) {
                 if (block == null) continue;
 
                 ClassModule module = classModuleFactory.getOrNoOp(block.classType());
@@ -77,6 +98,102 @@ public class RatingService {
         userIterStateRepo.save(state);
 
         return new MultiClassCalcResponseDto(resultBlocks);
+    }
+
+    private List<ClassParamsBlockDto> enrichWithSharedBMetrics(List<ClassParamsBlockDto> blocks) {
+        if (blocks == null || blocks.isEmpty()) {
+            return blocks;
+        }
+
+        ClassParamsBlockDto bBlock = blocks.stream()
+                .filter(Objects::nonNull)
+                .filter(b -> "B".equalsIgnoreCase(b.classType()))
+                .findFirst()
+                .orElse(null);
+        if (bBlock == null || bBlock.data() == null || bBlock.data().isEmpty()) {
+            return blocks;
+        }
+
+        Map<Integer, Map<String, Object>> bByYear = indexByYear(toMapData(bBlock.data()));
+        if (bByYear.isEmpty()) {
+            return blocks;
+        }
+
+        List<ClassParamsBlockDto> out = new ArrayList<>(blocks.size());
+        for (ClassParamsBlockDto block : blocks) {
+            if (block == null || block.data() == null || block.data().isEmpty()) {
+                out.add(block);
+                continue;
+            }
+
+            String classType = block.classType() == null ? "" : block.classType().toUpperCase(Locale.ROOT);
+            if (!"A".equals(classType) && !"M".equals(classType)) {
+                out.add(block);
+                continue;
+            }
+
+            List<Map<String, Object>> rows = toMapData(block.data());
+            String[] sharedKeys = "A".equals(classType) ? A_SHARED_FROM_B : M_SHARED_FROM_B;
+            for (Map<String, Object> row : rows) {
+                Integer year = toIntOrNull(row.get("year"));
+                if (year == null) {
+                    continue;
+                }
+                Map<String, Object> bRow = bByYear.get(year);
+                if (bRow == null) {
+                    continue;
+                }
+                for (String key : sharedKeys) {
+                    Object current = row.get(key);
+                    if (current != null) {
+                        continue;
+                    }
+                    Object fallback = bRow.get(key);
+                    if (fallback != null) {
+                        row.put(key, fallback);
+                    }
+                }
+            }
+
+            out.add(new ClassParamsBlockDto(block.classType(), rows, block.names()));
+        }
+
+        return out;
+    }
+
+    private List<Map<String, Object>> toMapData(List<?> data) {
+        JavaType targetType = objectMapper.getTypeFactory()
+                .constructCollectionType(List.class, Map.class);
+        try {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> mapped = (List<Map<String, Object>>) objectMapper.convertValue(data, targetType);
+            return mapped;
+        } catch (Exception ex) {
+            return List.of();
+        }
+    }
+
+    private Map<Integer, Map<String, Object>> indexByYear(List<Map<String, Object>> rows) {
+        Map<Integer, Map<String, Object>> out = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            Integer year = toIntOrNull(row.get("year"));
+            if (year != null) {
+                out.put(year, row);
+            }
+        }
+        return out;
+    }
+
+    private static Integer toIntOrNull(Object value) {
+        if (value == null) return null;
+        if (value instanceof Number n) return n.intValue();
+        String s = value.toString().trim();
+        if (s.isEmpty()) return null;
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     // ========================================================================
