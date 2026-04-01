@@ -49,7 +49,17 @@ public class DocumentService {
 
         double ki = 1 + 0.5 * ((pn == 0 ? 0 : di / pn) - 0.2) / 0.8;
         if (ki < 1.0) ki = 1.0;
+        if (hasAnyKey(in, "KI", "KI_raw")) {
+            ki = firstPresent(in, "KI", "KI_raw");
+        }
         out.put("KI", ki);
+
+        double kiA = hasAnyKey(in, "A_KI", "KI_A") ? firstPresent(in, "A_KI", "KI_A") : ki;
+        double kiB = hasAnyKey(in, "B_KI", "KI_B") ? firstPresent(in, "B_KI", "KI_B") : ki;
+        double kiM = hasAnyKey(in, "M_KI", "KI_M") ? firstPresent(in, "M_KI", "KI_M") : ki;
+        out.put("KI_A", kiA);
+        out.put("KI_B", kiB);
+        out.put("KI_M", kiM);
 
         double sumPoints = v.apply("sumPoints");
         double overall = sumPoints * ki;
@@ -323,6 +333,27 @@ public class DocumentService {
         out.put("B44_raw", b44raw);
         out.put("B44", Normalizer.clamp01(b44raw, 50.0, 500.0) * 5.0);
 
+        double bTotal = out.getOrDefault("B11", 0.0)
+            + out.getOrDefault("B12", 0.0)
+            + out.getOrDefault("B13", 0.0)
+            + out.getOrDefault("B21", 0.0)
+            + out.getOrDefault("B22", 0.0)
+            + out.getOrDefault("B23", 0.0)
+            + out.getOrDefault("B24", 0.0)
+            + out.getOrDefault("B25", 0.0)
+            + out.getOrDefault("B26", 0.0)
+            + out.getOrDefault("B31", 0.0)
+            + out.getOrDefault("B32", 0.0)
+            + out.getOrDefault("B33", 0.0)
+            + out.getOrDefault("B34", 0.0)
+            + out.getOrDefault("B41", 0.0)
+            + out.getOrDefault("B42", 0.0)
+            + out.getOrDefault("B43", 0.0)
+            + out.getOrDefault("B44", 0.0);
+        double bTotalWithKi = bTotal * kiB;
+        out.put("B_TOTAL", bTotal);
+        out.put("B_TOTAL_WITH_KI", bTotalWithKi);
+
         // -----------------------
         // 3. категория A (A31..A33)
         // -----------------------
@@ -351,9 +382,146 @@ public class DocumentService {
         out.put("A33_raw", a33raw);
         out.put("A33", Normalizer.clamp01(a33raw, 50.0, 500.0) * 4.0);
 
+        // A11 = (PRF / KCO) * 100
+        double a11raw = Normalizer.safeDiv(
+            firstPresent(in, "PRF", "A11_PRF"),
+            firstPresent(in, "KCO", "KTSO", "КЦО", "A11_KCO")
+        ) * 100.0;
+        out.put("A11_raw", a11raw);
+        out.put("A11", Normalizer.clamp01(a11raw, 80.0, 100.0) * 5.0);
+
+        // A21 = (ZKN / CHVA) * 100
+        double a21raw = Normalizer.safeDiv(
+            firstPresent(in, "ZKN", "ЗКН", "A21_ZKN"),
+            firstPresent(in, "CHVA", "ЧВА", "A21_CHVA")
+        ) * 100.0;
+        out.put("A21_raw", a21raw);
+        out.put("A21", Normalizer.clamp01(a21raw, 20.0, 80.0) * 25.0);
+
+        // A22 = (ZKN / CHPA) * 100
+        double a22raw = Normalizer.safeDiv(
+            firstPresent(in, "ZKN", "ЗКН", "A22_ZKN"),
+            firstPresent(in, "CHPA", "ЧПА", "A22_CHPA")
+        ) * 100.0;
+        out.put("A22_raw", a22raw);
+        out.put("A22", Normalizer.clamp01(a22raw, 10.0, 50.0) * 25.0);
+
+        // A23 = (CZ / CV) * 100, if CV is absent or zero use A23RF fallback
+        double cv = firstPresent(in, "CV", "ЦВ", "A23_CV");
+        double a23raw;
+        if (cv > 0.0) {
+            a23raw = Normalizer.safeDiv(
+                firstPresent(in, "CZ", "ЦЗ", "A23_CZ"),
+                cv
+            ) * 100.0;
+            out.put("A23_raw", a23raw);
+            out.put("A23", Normalizer.clamp01(a23raw, 30.0, 90.0) * 1.0);
+        } else {
+            a23raw = firstPresent(in, "A23RF", "A23_avg", "A23_RF");
+            out.put("A23_raw", a23raw);
+            out.put("A23", Normalizer.clamp01(a23raw, 0.0, 1.0) * 1.0);
+        }
+
+        // A34 = average((IA[Y]/ASP[Y]) * 100), Y=2022..2022+k-1
+        double sumA34 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double iaYear = firstPresent(in, "IA" + year, "ИА" + year);
+            double aspYear = firstPresent(in, "ASP" + year, "АСП" + year);
+            if (aspYear > 0.0) {
+            sumA34 += (iaYear / aspYear) * 100.0;
+            }
+        }
+        double a34raw = sumA34 / kYears;
+        out.put("A34_raw", a34raw);
+        out.put("A34", Normalizer.clamp01(a34raw, 1.0, 15.0) * 4.0);
+
+        // A35 = average(OD[Y] / NPR[Y]), Y=2022..2022+k-1
+        double sumA35 = 0.0;
+        for (int i = 0; i < kYears; i++) {
+            int year = 2022 + i;
+            double odYear = firstPresent(in, "OD" + year);
+            double nprYear = firstPresent(in, "NPR" + year);
+            if (nprYear > 0.0) {
+            sumA35 += odYear / nprYear;
+            }
+        }
+        double a35raw = sumA35 / kYears;
+        out.put("A35_raw", a35raw);
+        out.put("A35", Normalizer.clamp01(a35raw, 1000.0, 5000.0) * 8.0);
+
+        // A36 = PFN / ASO (ASO minimum is 3)
+        double aso = firstPresent(in, "ASO", "АСО", "A36_ASO");
+        double normalizedAso = aso < 3.0 ? 3.0 : aso;
+        double a36raw = Normalizer.safeDiv(
+            firstPresent(in, "PFN", "ПФН", "A36_PFN"),
+            normalizedAso
+        );
+        out.put("A36_raw", a36raw);
+        out.put("A36", Normalizer.clamp01(a36raw, 300.0, 3000.0) * 8.0);
+
+        // A37 is an indicator in [0, 1]
+        double a37raw = firstPresent(in, "A37_o", "A37_raw", "DS", "A37");
+        out.put("A37_raw", a37raw);
+        out.put("A37", Normalizer.clamp01(a37raw, 0.0, 1.0) * 2.0);
+
+        double aTotal = out.get("A11") + out.get("A21") + out.get("A22") + out.get("A23")
+            + out.get("A31") + out.get("A32") + out.get("A33")
+            + out.get("A34") + out.get("A35") + out.get("A36") + out.get("A37");
+        double aTotalWithKi = aTotal * kiA;
+        out.put("A_TOTAL", aTotal);
+        out.put("A_TOTAL_WITH_KI", aTotalWithKi);
+
         // -----------------------
-        // 3. категория M (M31..M33)
+        // группа M (M11..M23, M31..M33)
         // -----------------------
+
+        // M11 = (ZMD / ZM) * 100
+        double m11raw = Normalizer.safeDiv(
+            firstPresent(in, "ZMD", "ЗМД", "M11_ZMD"),
+            firstPresent(in, "ZM", "ЗМ", "M11_ZM")
+        ) * 100.0;
+        out.put("M11_raw", m11raw);
+        out.put("M11", Normalizer.clamp01(m11raw, 10.0, 50.0) * 10.0);
+
+        // M12 = CHZ / ZPK
+        double m12raw = Normalizer.safeDiv(
+            firstPresent(in, "CHZ", "ЧЗ", "M12_CHZ"),
+            firstPresent(in, "ZPK", "ЗПК", "M12_ZPK")
+        );
+        out.put("M12_raw", m12raw);
+        out.put("M12", Normalizer.clamp01(m12raw, 1.5, 4.0) * 5.0);
+
+        // M13 = MDP / ZPK
+        double m13raw = Normalizer.safeDiv(
+            firstPresent(in, "MDP", "МДП", "M13_MDP"),
+            firstPresent(in, "ZPK", "ЗПК", "M13_ZPK")
+        );
+        out.put("M13_raw", m13raw);
+        out.put("M13", Normalizer.clamp01(m13raw, 0.0, 0.25) * 5.0);
+
+        // M14 = (PRF / KCO) * 100
+        double m14raw = Normalizer.safeDiv(
+            firstPresent(in, "PRF", "M14_PRF"),
+            firstPresent(in, "KCO", "KTSO", "КЦО", "M14_KCO")
+        ) * 100.0;
+        out.put("M14_raw", m14raw);
+        out.put("M14", Normalizer.clamp01(m14raw, 80.0, 100.0) * 5.0);
+
+        // M21 is an indicator in [0, 1]
+        double m21raw = firstPresent(in, "M21_o", "M21_raw", "M21");
+        out.put("M21_raw", m21raw);
+        out.put("M21", Normalizer.clamp01(m21raw, 0.0, 1.0) * 2.0);
+
+        // M22 corresponds to B22 ratio and normalization
+        double m22raw = in.values().containsKey("M22_o") ? v.apply("M22_o") : b22raw;
+        out.put("M22_raw", m22raw);
+        out.put("M22", Normalizer.clamp01(m22raw, 0.0, 0.25) * 6.0);
+
+        // M23 corresponds to B23 ratio and normalization
+        double m23raw = in.values().containsKey("M23_o") ? v.apply("M23_o") : b23raw;
+        out.put("M23_raw", m23raw);
+        out.put("M23", Normalizer.clamp01(m23raw, 0.0, 0.20) * 6.0);
 
         // M31_o может приходить уже агрегированным из внешнего расчёта.
         double m31raw = firstPresent(in, "M31_o", "M31_raw", "M31raw");
@@ -369,6 +537,13 @@ public class DocumentService {
         double m33raw = b34raw;
         out.put("M33_raw", m33raw);
         out.put("M33", Normalizer.clamp01(m33raw, 0.3, 1.5) * 2.0);
+
+        double mTotal = out.get("M11") + out.get("M12") + out.get("M13") + out.get("M14")
+            + out.get("M21") + out.get("M22") + out.get("M23")
+            + out.get("M31") + out.get("M32") + out.get("M33");
+        double mTotalWithKi = mTotal * kiM;
+        out.put("M_TOTAL", mTotal);
+        out.put("M_TOTAL_WITH_KI", mTotalWithKi);
 
         return new DocumentCalcDto(out);
     }

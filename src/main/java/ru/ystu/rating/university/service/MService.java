@@ -81,13 +81,45 @@ public class MService {
             Map<String, Double> numeric = toNumericMap(raw);
             DocumentCalcDto dcalc = documentService.computeAll(new DocumentParamsDto(numeric));
 
+            double m11Final = metricOrDefault(raw, "M11", dcalc.get("M11"));
+            double m12Final = metricOrDefault(raw, "M12", dcalc.get("M12"));
+            double m13Final = metricOrDefault(raw, "M13", dcalc.get("M13"));
+            double m14Final = metricOrDefault(raw, "M14", dcalc.get("M14"));
+            double m21Final = metricOrDefault(raw, "M21", dcalc.get("M21"));
+            double m22Final = metricOrDefault(raw, "M22", dcalc.get("M22"));
+            double m23Final = metricOrDefault(raw, "M23", dcalc.get("M23"));
+            double m31Final = metricOrDefault(raw, "M31", dcalc.get("M31"));
+            double m32Final = metricOrDefault(raw, "M32", dcalc.get("M32"));
+            double m33Final = metricOrDefault(raw, "M33", dcalc.get("M33"));
+
+            Double kiOverride = firstNonNull(
+                    toDoubleOrNull(raw.get("M_KI")),
+                    toDoubleOrNull(raw.get("KI_M")),
+                    toDoubleOrNull(raw.get("KI"))
+            );
+            double mKi = kiOverride != null ? kiOverride : dcalc.get("KI_M");
+            double mTotal = m11Final + m12Final + m13Final + m14Final
+                    + m21Final + m22Final + m23Final
+                    + m31Final + m32Final + m33Final;
+            double mTotalWithKi = mTotal * mKi;
+
             Map<String, Object> calc = new LinkedHashMap<>();
             calc.put("year", year);
             calc.put("iteration", iter);
-            calc.put("M31", dcalc.get("M31"));
-            calc.put("M32", dcalc.get("M32"));
-            calc.put("M33", dcalc.get("M33"));
-            calc.put("TOTAL", dcalc.get("M31") + dcalc.get("M32") + dcalc.get("M33"));
+            calc.put("M11", m11Final);
+            calc.put("M12", m12Final);
+            calc.put("M13", m13Final);
+            calc.put("M14", m14Final);
+            calc.put("M21", m21Final);
+            calc.put("M22", m22Final);
+            calc.put("M23", m23Final);
+            calc.put("M31", m31Final);
+            calc.put("M32", m32Final);
+            calc.put("M33", m33Final);
+            calc.put("KI", mKi);
+            calc.put("TOTAL", mTotalWithKi);
+            calc.put("M_TOTAL", mTotal);
+            calc.put("M_TOTAL_WITH_KI", mTotalWithKi);
 
             CalcResult cr = new CalcResult();
             cr.setData(d);
@@ -197,5 +229,25 @@ public class MService {
             }
         }
         return out;
+    }
+
+    private static double metricOrDefault(Map<String, Object> rawParams, String key, double fallback) {
+        if (rawParams == null || rawParams.isEmpty()) {
+            return fallback;
+        }
+        Double direct = toDoubleOrNull(rawParams.get(key));
+        if (direct == null) {
+            direct = toDoubleOrNull(rawParams.get(key.toLowerCase()));
+        }
+        return direct == null ? fallback : direct;
+    }
+
+    private static Double firstNonNull(Double... values) {
+        for (Double value : values) {
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 }

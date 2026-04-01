@@ -225,12 +225,16 @@ public class BService {
             double b42Final = metricOrDefault(rawParams, "B42", docCalc.get("B42"));
             double b43Final = metricOrDefault(rawParams, "B43", docCalc.get("B43"));
             double b44Final = metricOrDefault(rawParams, "B44", docCalc.get("B44"));
-            double sumBFinal = b11Final + b12Final + b13Final + b21Final
+            double sumBRawFinal = b11Final + b12Final + b13Final + b21Final
                     + b22Final + b23Final + b24Final
                     + b25Final + b26Final
                     + b31Final + b32Final + b33Final
                     + b34Final + b41Final + b42Final
                     + b43Final + b44Final;
+            double kiFinal = metricOrDefault(rawParams, "B_KI",
+                    metricOrDefault(rawParams, "KI_B",
+                            metricOrDefault(rawParams, "KI", docCalc.get("KI_B"))));
+            double sumBFinal = sumBRawFinal * kiFinal;
 
             // transfer additional metrics into calcDto by rebuilding it - easier
             calcDto = new BCalcDto(
@@ -279,7 +283,11 @@ public class BService {
 
             CalcResult cr = new CalcResult();
             cr.setData(d);
-            cr.setCalcParams(BCalcMapper.toCalcJson(calcDto));
+            Map<String, Object> calcJson = BCalcMapper.toCalcJson(calcDto);
+            calcJson.put("KI", kiFinal);
+            calcJson.put("B_TOTAL", sumBRawFinal);
+            calcJson.put("B_TOTAL_WITH_KI", sumBFinal);
+            cr.setCalcParams(calcJson);
             calcRepo.save(cr);
 
             if(namesDto != null){

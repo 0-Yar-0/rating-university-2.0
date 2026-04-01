@@ -82,17 +82,50 @@ public class AService {
             DocumentParamsDto dparams = new DocumentParamsDto(numeric);
             DocumentCalcDto dcalc = documentService.computeAll(dparams);
 
+            double a11Final = metricOrDefault(raw, "A11", dcalc.get("A11"));
+            double a21Final = metricOrDefault(raw, "A21", dcalc.get("A21"));
+            double a22Final = metricOrDefault(raw, "A22", dcalc.get("A22"));
+            double a23Final = metricOrDefault(raw, "A23", dcalc.get("A23"));
+            double a31Final = metricOrDefault(raw, "A31", dcalc.get("A31"));
+            double a32Final = metricOrDefault(raw, "A32", dcalc.get("A32"));
+            double a33Final = metricOrDefault(raw, "A33", dcalc.get("A33"));
+            double a34Final = metricOrDefault(raw, "A34", dcalc.get("A34"));
+            double a35Final = metricOrDefault(raw, "A35", dcalc.get("A35"));
+            double a36Final = metricOrDefault(raw, "A36", dcalc.get("A36"));
+            double a37Final = metricOrDefault(raw, "A37", dcalc.get("A37"));
+
+            Double kiOverride = firstNonNull(
+                    toDoubleOrNull(raw.get("A_KI")),
+                    toDoubleOrNull(raw.get("KI_A")),
+                    toDoubleOrNull(raw.get("KI"))
+            );
+            double aKi = kiOverride != null ? kiOverride : dcalc.get("KI_A");
+            double aTotal = a11Final + a21Final + a22Final + a23Final
+                    + a31Final + a32Final + a33Final
+                    + a34Final + a35Final + a36Final + a37Final;
+            double aTotalWithKi = aTotal * aKi;
+
             Map<String, Object> calc = new LinkedHashMap<>();
             calc.put("year", year);
             calc.put("iteration", iter);
             calc.put("PN", dcalc.get("PN"));
             calc.put("DI", dcalc.get("DI"));
-            calc.put("KI", dcalc.get("KI"));
+                calc.put("KI", aKi);
             calc.put("sumPoints", numeric.getOrDefault("sumPoints", 0.0));
-            calc.put("TOTAL", dcalc.get("TOTAL"));
-            calc.put("A31", dcalc.get("A31"));
-            calc.put("A32", dcalc.get("A32"));
-            calc.put("A33", dcalc.get("A33"));
+                calc.put("TOTAL", aTotalWithKi);
+            calc.put("A11", a11Final);
+            calc.put("A21", a21Final);
+            calc.put("A22", a22Final);
+            calc.put("A23", a23Final);
+            calc.put("A31", a31Final);
+            calc.put("A32", a32Final);
+            calc.put("A33", a33Final);
+            calc.put("A34", a34Final);
+            calc.put("A35", a35Final);
+            calc.put("A36", a36Final);
+            calc.put("A37", a37Final);
+            calc.put("A_TOTAL", aTotal);
+            calc.put("A_TOTAL_WITH_KI", aTotalWithKi);
 
             CalcResult cr = new CalcResult();
             cr.setData(d);
@@ -201,5 +234,25 @@ public class AService {
             }
         }
         return out;
+    }
+
+    private static double metricOrDefault(Map<String, Object> rawParams, String key, double fallback) {
+        if (rawParams == null || rawParams.isEmpty()) {
+            return fallback;
+        }
+        Double direct = toDoubleOrNull(rawParams.get(key));
+        if (direct == null) {
+            direct = toDoubleOrNull(rawParams.get(key.toLowerCase()));
+        }
+        return direct == null ? fallback : direct;
+    }
+
+    private static Double firstNonNull(Double... values) {
+        for (Double value : values) {
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 }
