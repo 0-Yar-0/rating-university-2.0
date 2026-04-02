@@ -22,7 +22,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+    "spring.datasource.url=jdbc:h2:mem:rating_test",
+    "spring.datasource.driver-class-name=org.h2.Driver",
+    "spring.datasource.username=sa",
+    "spring.datasource.password=",
+    "spring.datasource.hikari.data-source-properties.MODE=PostgreSQL",
+    "spring.datasource.hikari.data-source-properties.DATABASE_TO_LOWER=TRUE",
+    "spring.datasource.hikari.connection-init-sql=CREATE DOMAIN IF NOT EXISTS JSONB AS JSON\\;CREATE ALIAS IF NOT EXISTS JSONB_TYPEOF FOR 'ru.ystu.rating.university.H2JsonFunctions.jsonbTypeof'",
+    "spring.liquibase.enabled=true",
+    "spring.liquibase.change-log=classpath:db/changelog/db.changelog-test.xml",
+    "spring.jpa.hibernate.ddl-auto=validate",
+    "spring.jpa.open-in-view=false"
+})
 @AutoConfigureMockMvc
 public class RatingControllerIntegrationTest {
 

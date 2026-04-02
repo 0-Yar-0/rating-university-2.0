@@ -145,7 +145,14 @@ public class DocumentService {
         double npz = firstPresent(in, "NPz", "Nz");
         double np = 1.0 * npo + 0.25 * npv + 0.1 * npz;
         double noa = v.apply("NOA");
-        double b23raw = Normalizer.safeDiv(0.25 * pkp + ppp, np + noa);
+        double b23Numerator = 0.25 * pkp + ppp;
+        double b23Denominator = np + noa;
+        double b23raw;
+        if (b23Denominator == 0.0 && b23Numerator > 0.0) {
+            b23raw = 1.0;
+        } else {
+            b23raw = Normalizer.safeDiv(b23Numerator, b23Denominator);
+        }
         out.put("B23_raw", b23raw);
         double b23 = Normalizer.clamp01(b23raw, 0.0, 0.20) * 6.0;
         out.put("B23", b23);

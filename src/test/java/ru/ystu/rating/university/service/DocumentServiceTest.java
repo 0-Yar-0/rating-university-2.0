@@ -162,6 +162,27 @@ class DocumentServiceTest {
     }
 
     @Test
+    void testB23UsesSpecialRuleWhenDenominatorIsZero() {
+        Map<String, Double> inputs = new HashMap<>();
+        inputs.put("KPo", 10.0);
+        inputs.put("KPv", 0.0);
+        inputs.put("KPz", 0.0);
+        inputs.put("PPPo", 0.0);
+        inputs.put("PPPv", 0.0);
+        inputs.put("PPPz", 0.0);
+        inputs.put("NPo", 0.0);
+        inputs.put("NPv", 0.0);
+        inputs.put("NPz", 0.0);
+        inputs.put("NOA", 0.0);
+
+        DocumentCalcDto out = svc.computeAll(new DocumentParamsDto(inputs));
+
+        assertEquals(1.0, out.get("B23_raw"), 1e-6);
+        assertEquals(6.0, out.get("B23"), 1e-6);
+        assertEquals(6.0, out.get("M23"), 1e-6);
+    }
+
+    @Test
     void testB25B26WithDynamicK() {
         Map<String, Double> inputs = new HashMap<>();
         inputs.put("k", 2.0);
