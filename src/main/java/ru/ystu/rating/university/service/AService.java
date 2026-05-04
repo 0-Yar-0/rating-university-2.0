@@ -110,7 +110,8 @@ public class AService {
             calc.put("iteration", iter);
             calc.put("PN", dcalc.get("PN"));
             calc.put("DI", dcalc.get("DI"));
-                calc.put("KI", aKi);
+            calc.put("KI", aKi);
+            calc.put("KI_A", aKi);
             calc.put("sumPoints", numeric.getOrDefault("sumPoints", 0.0));
                 calc.put("TOTAL", aTotalWithKi);
             calc.put("A11", a11Final);

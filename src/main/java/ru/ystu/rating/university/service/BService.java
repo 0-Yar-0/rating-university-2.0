@@ -285,6 +285,7 @@ public class BService {
             cr.setData(d);
             Map<String, Object> calcJson = BCalcMapper.toCalcJson(calcDto);
             calcJson.put("KI", kiFinal);
+            calcJson.put("KI_B", kiFinal);
             calcJson.put("B_TOTAL", sumBRawFinal);
             calcJson.put("B_TOTAL_WITH_KI", sumBFinal);
             cr.setCalcParams(calcJson);

@@ -22,56 +22,56 @@ public class CalcResultName {
     @Column(name = "code_class_v", nullable = false)
     private String codeClassV = "М";
 
-    @Column(name = "code_b11", nullable = false, length = 50)
-    private String codeB11 = "B11";
+    @Column(name = "code_b11", nullable = false, length = 100)
+    private String codeB11 = "Б11 - Средний балл ЕГЭ";
 
-    @Column(name = "code_b12", nullable = false, length = 50)
-    private String codeB12 = "B12";
+    @Column(name = "code_b12", nullable = false, length = 100)
+    private String codeB12 = "Б12 - Исполнение КЦП прошлых лет";
 
-    @Column(name = "code_b13", nullable = false, length = 50)
-    private String codeB13 = "B13";
+    @Column(name = "code_b13", nullable = false, length = 100)
+    private String codeB13 = "Б13 - Магистранты из стран БРИКС";
 
-    @Column(name = "code_b21", nullable = false, length = 50)
-    private String codeB21 = "B21";
+    @Column(name = "code_b21", nullable = false, length = 100)
+    private String codeB21 = "Б21 - Наличие ПОА";
 
-    @Column(name = "code_b22", nullable = false, length = 50)
-    private String codeB22 = "B22";
+    @Column(name = "code_b22", nullable = false, length = 100)
+    private String codeB22 = "Б22 - Учебная аккредитация";
 
-    @Column(name = "code_b23", nullable = false, length = 50)
-    private String codeB23 = "B23";
+    @Column(name = "code_b23", nullable = false, length = 100)
+    private String codeB23 = "Б23 - Количество ОП с аккредитацией";
 
-    @Column(name = "code_b24", nullable = false, length = 50)
-    private String codeB24 = "B24";
+    @Column(name = "code_b24", nullable = false, length = 100)
+    private String codeB24 = "Б24 - Развитие системы качества";
 
-    @Column(name = "code_b25", nullable = false, length = 50)
-    private String codeB25 = "B25";
+    @Column(name = "code_b25", nullable = false, length = 100)
+    private String codeB25 = "Б25 - Участие в сетевом взаимодействии";
 
-    @Column(name = "code_b26", nullable = false, length = 50)
-    private String codeB26 = "B26";
+    @Column(name = "code_b26", nullable = false, length = 100)
+    private String codeB26 = "Б26 - Инновационная деятельность";
 
-    @Column(name = "code_b31", nullable = false, length = 50)
-    private String codeB31 = "B31";
+    @Column(name = "code_b31", nullable = false, length = 100)
+    private String codeB31 = "Б31 - Трудоустройство выпускников";
 
-    @Column(name = "code_b32", nullable = false, length = 50)
-    private String codeB32 = "B32";
+    @Column(name = "code_b32", nullable = false, length = 100)
+    private String codeB32 = "Б32 - Средняя зарплата выпускников";
 
-    @Column(name = "code_b33", nullable = false, length = 50)
-    private String codeB33 = "B33";
+    @Column(name = "code_b33", nullable = false, length = 100)
+    private String codeB33 = "Б33 - Удовлетворённость компаний выпускниками";
 
-    @Column(name = "code_b34", nullable = false, length = 50)
-    private String codeB34 = "B34";
+    @Column(name = "code_b34", nullable = false, length = 100)
+    private String codeB34 = "Б34 - Карьерное развитие выпускников";
 
-    @Column(name = "code_b41", nullable = false, length = 50)
-    private String codeB41 = "B41";
+    @Column(name = "code_b41", nullable = false, length = 100)
+    private String codeB41 = "Б41 - Публикации на 100 НПР";
 
-    @Column(name = "code_b42", nullable = false, length = 50)
-    private String codeB42 = "B42";
+    @Column(name = "code_b42", nullable = false, length = 100)
+    private String codeB42 = "Б42 - Цитирования в международных БД";
 
-    @Column(name = "code_b43", nullable = false, length = 50)
-    private String codeB43 = "B43";
+    @Column(name = "code_b43", nullable = false, length = 100)
+    private String codeB43 = "Б43 - Участие в зарубежных проектах";
 
-    @Column(name = "code_b44", nullable = false, length = 50)
-    private String codeB44 = "B44";
+    @Column(name = "code_b44", nullable = false, length = 100)
+    private String codeB44 = "Б44 - Инновационные разработки";
 
     public CalcResultName() {
     }

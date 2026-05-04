@@ -135,6 +135,7 @@ public class MService {
             calc.put("M43", m43Final);
             calc.put("M44", m44Final);
             calc.put("KI", mKi);
+            calc.put("KI_M", mKi);
             calc.put("TOTAL", mTotalWithKi);
             calc.put("M_TOTAL", mTotal);
             calc.put("M_TOTAL_WITH_KI", mTotalWithKi);

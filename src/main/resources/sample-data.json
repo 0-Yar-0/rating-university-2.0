@@ -1,0 +1,150 @@
+{
+  "description": "Sample data based on formula screenshots for rating calculations",
+  "version": "1.0",
+  "classA": {
+    "year": 2024,
+    "pedagogicalIndicators": {
+      "correctionCoefficientTeachers": {
+        "PNo": 907,
+        "PNv": 0,
+        "PNz": 345,
+        "PN_calculated": 941.5
+      },
+      "teachersWithHealthConstraints": {
+        "DIo": 19,
+        "DIv": 0,
+        "DIz": 3,
+        "DI_calculated": 19.3
+      },
+      "correctionIndex": {
+        "KI_formula": "1 + 0.5 * ((DI/PN - 0.2) / 0.8), min 1.0",
+        "KI_calculated": 1.0
+      },
+      "totalScore": 57.771,
+      "totalScoreWithKI": 57.771
+    },
+    "metrics": {
+      "A11": 5,
+      "A21": 25,
+      "A22": 25,
+      "A23": 1,
+      "A31": 8,
+      "A32": 8,
+      "A33": 4,
+      "A34": 4,
+      "A35": 8,
+      "A36": 8,
+      "A37": 2
+    }
+  },
+  "classB": {
+    "year": 2024,
+    "researchIndicators": {
+      "B11": {
+        "name": "Средний балл ЕГЭ",
+        "weight": 23,
+        "inputs": {
+          "ENa": 0,
+          "ENb": 203,
+          "ENc": 14,
+          "Eb": 71.60,
+          "Ec": 61.90
+        },
+        "formula": "(ENa*100 + ENb*Eb + ENc*Ec) / (ENa + ENb + ENc)",
+        "raw_value": 70.97,
+        "min": 40.0,
+        "max": 90.0,
+        "normalized": 0.619,
+        "weighted_score": 14.248
+      },
+      "B12": {
+        "name": "Исполнение КЦП прошлых лет",
+        "weight": 3,
+        "inputs": {
+          "beta121": 660,
+          "beta122": 660,
+          "PRF": 660,
+          "KCO": 660
+        },
+        "formula": "PRF / KCO * 100",
+        "raw_value": 100.0,
+        "min": 80.0,
+        "max": 100.0,
+        "normalized": 1.0,
+        "weighted_score": 3.0
+      }
+    },
+    "metrics": {
+      "B11": 14.248,
+      "B12": 3.0,
+      "B13": 4,
+      "B21": 2,
+      "B22": 6,
+      "B23": 6,
+      "B24": 6,
+      "B25": 1,
+      "B26": 1,
+      "B31": 13,
+      "B32": 5,
+      "B33": 12,
+      "B34": 2,
+      "B41": 5,
+      "B42": 5,
+      "B43": 5,
+      "B44": 5
+    },
+    "totals": {
+      "sumB": 104,
+      "KI": 1.0,
+      "B_TOTAL": 104,
+      "B_TOTAL_WITH_KI": 104
+    }
+  },
+  "classM": {
+    "year": 2024,
+    "masteryIndicators": {
+      "metrics": {
+        "M11": 10,
+        "M12": 5,
+        "M13": 5,
+        "M14": 5,
+        "M21": 2,
+        "M22": 6,
+        "M23": 6,
+        "M24": 6,
+        "M25": 1,
+        "M26": 1,
+        "M27": 1,
+        "M31": 20,
+        "M32": 5,
+        "M33": 2,
+        "M41": 8,
+        "M42": 8,
+        "M43": 7,
+        "M44": 7
+      },
+      "totals": {
+        "sumM": 112,
+        "KI_M": 1.0,
+        "M_TOTAL": 112,
+        "M_TOTAL_WITH_KI": 112
+      }
+    }
+  },
+  "notes": {
+    "formulas": {
+      "PN": "1.0 * PNo + 0.25 * PNv + 0.1 * PNz",
+      "DI": "1.0 * DIo + 0.25 * DIv + 0.1 * DIz",
+      "KI": "max(1.0, 1 + 0.5 * ((DI/PN - 0.2) / 0.8))",
+      "B11": "min(1, max(0, (raw - min) / (max - min))) * weight",
+      "totalWithKI": "total * KI"
+    },
+    "references": [
+      "Б11_1.png - B11 metric formula",
+      "Б11_2.png - B11 normalization",
+      "Б12_1.png - B12 metric formula",
+      "01.png - A class correction coefficients",
+      "02.png - A class KI calculation"
+    ]
+  }
+}
