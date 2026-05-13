@@ -41,6 +41,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO rating_university_user
 ```
 
 ## Build and start project
+### docker
 ```bash
 docker build -t rating-university . 
 
@@ -52,4 +53,24 @@ docker run --rm -p 8080:8080 \
   -e PGUSER=rating_university_user \
   -e PGPASSWORD=rating_university_user_password \
   rating-university:latest
+```
+
+### gradlew
+
+Before building, ensure openjdk-17-jdk is selected.
+
+```bash
+sudo apt install openjdk-17-jdk
+sudo update-alternatives --config java
+```
+
+```bash
+export PGHOST=localhost  
+export PGPORT=5432
+export PGDATABASE=rating_university_db
+export PGUSER=rating_university_user
+export PGPASSWORD=rating_university_user_password
+
+./gradlew build
+./gradlew bootRun
 ```
